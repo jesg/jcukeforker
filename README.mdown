@@ -1,10 +1,8 @@
-# cukeforker
+# jcukeforker
 
 Forking cukes and VNC displays.
 
-[![Build Status](https://secure.travis-ci.org/jarib/cukeforker.png)](http://travis-ci.org/jarib/cukeforker)
-[![Code Climate](https://codeclimate.com/github/jarib/cukeforker.png)](https://codeclimate.com/github/jarib/cukeforker)
-[![Coverage Status](https://coveralls.io/repos/jarib/cukeforker/badge.png)](https://coveralls.io/r/jarib/cukeforker)
+Jcukeforker is a fork of cukeforker desgined for jruby.
 
 ### NB!
 
@@ -17,7 +15,7 @@ to avoid this.
 
 ```ruby
     # parallelize per feature
-    CukeForker::Runner.run Dir['features/**/*.feature'],
+    JCukeForker::Runner.run Dir['features/**/*.feature'],
                            :max        => 4                     # number of workers
                            :out        => "/path/to/reports",   # output path
                            :format     => :html                 # passed to `cucumber --format`,
@@ -25,7 +23,7 @@ to avoid this.
                            :vnc        => true                  # manage a pool of VNC displays, assign one per worker.
 
     # parallelize per scenario, with one JUnit XML file per scenario.
-    CukeForker::Runner.run CukeForker::Scenarios.tagged(%W[@edition ~@wip])
+    JCukeForker::Runner.run JCukeForker::Scenarios.tagged(%W[@edition ~@wip])
                            :extra_args => %W[-f CukeForker::Formatters::JunitScenarioFormatter --out results/junit]
 ```
 

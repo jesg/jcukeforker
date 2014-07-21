@@ -3,7 +3,7 @@ $:.push File.expand_path("../lib", __FILE__)
 require "cukeforker/version"
 
 Gem::Specification.new do |s|
-  s.name        = "cukeforker"
+  s.name        = "jcukeforker"
   s.version     = CukeForker::VERSION
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Jari Bakken"]
@@ -12,10 +12,12 @@ Gem::Specification.new do |s|
   s.summary     = %q{Library to maintain a forking queue of Cucumber processes}
   s.description = %q{Library to maintain a forking queue of Cucumber processes, with optional VNC displays.}
 
-  s.rubyforge_project = "cukeforker"
+  s.rubyforge_project = "jcukeforker"
 
   s.add_dependency "cucumber", ">= 1.1.5"
   s.add_dependency "vnctools", ">= 0.0.5"
+  s.add_dependency "celluloid-io"
+  s.add_dependency "childprocess"
   s.add_development_dependency "rspec", "~> 2.5"
   s.add_development_dependency "coveralls"
   s.add_development_dependency "rake", "~> 0.9.2"

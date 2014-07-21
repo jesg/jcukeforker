@@ -1,6 +1,6 @@
 require "logger"
 
-module CukeForker
+module JCukeForker
   class LoggingListener < AbstractListener
     TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
@@ -12,16 +12,20 @@ module CukeForker
       log.info "[    run           ] starting"
     end
 
-    def on_worker_starting(worker)
-      log.info "[    worker  #{worker.id.to_s.ljust 3}   ] starting: #{worker.feature}"
+    def on_worker_register(worker_path)
+      log.info "[    worker  #{worker_id(worker_path).ljust 3}   ] register: #{worker_path}"
     end
 
-    def on_worker_forked(worker)
-      log.info "[    worker  #{worker.id.to_s.ljust 3}   ] forked  : #{worker.feature}"
+    def on_worker_dead(worker_path)
+      log.info "[    worker  #{worker_id(worker_path).ljust 3}   ] dead    : #{worker_path}"
     end
 
-    def on_worker_finished(worker)
-      log.info "[    worker  #{worker.id.to_s.ljust 3}   ] #{status_string(worker.failed?).ljust(8)}: #{worker.feature}"
+    def on_task_starting(worker_path, feature)
+      log.info "[    worker  #{worker_id(worker_path).ljust 3}   ] starting: #{feature}"
+    end
+
+    def on_task_finished(worker_path, feature, status)
+      log.info "[    worker  #{worker_id(worker_path).ljust 3}   ] #{status_string(status).ljust(8)}: #{feature}"
     end
 
     def on_run_finished(failed)
@@ -57,7 +61,11 @@ module CukeForker
     private
 
     def status_string(failed)
-      failed ? 'failed' : 'passed'
+      failed == 'false' ? 'failed' : 'passed'
+    end
+
+    def worker_id(worker_path)
+      /\-(\d+)$/.match(worker_path).captures[0]
     end
 
     def log

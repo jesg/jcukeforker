@@ -1,4 +1,4 @@
-module CukeForker
+module JCukeForker
 
   #
   # Runner.run(features, opts)
@@ -52,45 +52,53 @@ module CukeForker
       if opts[:log]
         listeners << LoggingListener.new
       end
+#
+#      if vnc = opts[:vnc]
+#        if vnc.kind_of?(Class)
+#          vnc_pool = VncTools::ServerPool.new(max, vnc)
+#        else
+#          vnc_pool = VncTools::ServerPool.new(max)
+#        end
+#
+#        listener = VncListener.new(vnc_pool)
+#
+#        if record = opts[:record]
+#          if record.kind_of?(Hash)
+#            listeners << RecordingVncListener.new(listener, record)
+#          else
+#            listeners << RecordingVncListener.new(listener)
+#          end
+#        else
+#          listeners << listener
+#        end
+#      end
 
-      if vnc = opts[:vnc]
-        if vnc.kind_of?(Class)
-          vnc_pool = VncTools::ServerPool.new(max, vnc)
-        else
-          vnc_pool = VncTools::ServerPool.new(max)
-        end
-
-        listener = VncListener.new(vnc_pool)
-
-        if record = opts[:record]
-          if record.kind_of?(Hash)
-            listeners << RecordingVncListener.new(listener, record)
-          else
-            listeners << RecordingVncListener.new(listener)
-          end
-        else
-          listeners << listener
-        end
-      end
-
-      queue = WorkerQueue.new max, delay
+      task_manager = TaskManager.new
       features.each do |feature|
-        queue.add Worker.new(feature, format, out, extra_args)
+        task_manager.add({feature: feature, format: format,out: out,extra_args: extra_args})
       end
 
-      runner = Runner.new queue
+      listeners << task_manager
+      status_server = StatusServer.new '6333'
+      worker_dir = "/tmp/jcukeforker-#{SecureRandom.hex 4}"
+      FileUtils.mkdir_p worker_dir
+      processes = create_processes max, '6333', worker_dir
+
+      runner = Runner.new status_server, processes, worker_dir
 
       listeners.each { |l|
-        queue.add_observer l
+        status_server.add_observer l
         runner.add_observer l
-        vnc_pool.add_observer l if opts[:vnc]
+#        vnc_pool.add_observer l if opts[:vnc]
       }
 
       runner
     end
 
-    def initialize(queue)
-      @queue = queue
+    def initialize(status_server, processes, worker_dir)
+      @status_server = status_server
+      @processes = processes
+      @worker_dir = worker_dir
     end
 
     def run
@@ -108,18 +116,26 @@ module CukeForker
 
     private
 
+    def self.create_processes(max, status_path, worker_dir)
+      worker_file = "#{File.expand_path File.dirname(__FILE__)}/worker.rb"
+      (1..max).inject([]){|l, i| l << ChildProcess.build('ruby', worker_file, status_path, "#{worker_dir}/worker-#{i}")}
+    end
+
     def start
+      @processes.each &:start
       fire :on_run_starting
     end
 
     def process
-      @queue.process 0.2
+      @status_server.async.run
+      @processes.each &:wait
     end
 
     def stop
-      @queue.wait_until_finished 0.5
+      @status_server.shutdown
     ensure # catch potential second Interrupt
-      fire :on_run_finished, @queue.has_failures?
+      FileUtils.rm_r @worker_dir
+      #fire :on_run_finished, @queue.has_failures?
     end
 
     def fire(*args)

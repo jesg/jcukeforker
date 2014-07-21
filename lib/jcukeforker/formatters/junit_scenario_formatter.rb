@@ -1,6 +1,6 @@
 require 'cucumber/formatter/junit'
 require 'cucumber/formatter/ordered_xml_markup'
-module CukeForker
+module JCukeForker
   module Formatters
     class JunitScenarioFormatter < Cucumber::Formatter::Junit
       def feature_result_filename(feature_file)

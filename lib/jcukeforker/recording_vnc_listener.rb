@@ -1,4 +1,4 @@
-module CukeForker
+module JCukeForker
   class RecordingVncListener < AbstractListener
     extend Forwardable
 

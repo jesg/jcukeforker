@@ -1,5 +1,5 @@
 require 'gherkin/tag_expression'
-module CukeForker
+module JCukeForker
   module Formatters
     class ScenarioLineLogger
       attr_reader :scenarios

@@ -1,16 +1,34 @@
-module CukeForker
+module JCukeForker
   class AbstractListener
 
     def on_run_starting
     end
 
-    def on_worker_starting(worker)
+    def on_worker_register(worker_path)
     end
 
-    def on_worker_finished(worker)
+    def on_worker_waiting(worker_path)
+    end
+
+    def on_worker_dead(worker_path)
+    end
+
+    def on_task_starting(worker_path, feature)
+    end
+
+    def on_task_finished(worker_path, feature, status)
     end
 
     def on_worker_forked(worker)
+    end
+
+    def on_worker_register(worker_path)
+    end
+
+    def on_worker_waiting(worker_path)
+    end
+
+    def on_worker_dead(worker_path)
     end
 
     def on_run_interrupted

@@ -1,4 +1,4 @@
-module CukeForker
+module JCukeForker
   class VncListener < AbstractListener
     def initialize(pool)
       @pool = pool
