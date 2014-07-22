@@ -27,6 +27,8 @@ module JCukeForker
       socket.close
     end
 
+    private
+
     def fire(*args)
       changed
       notify_observers *args
