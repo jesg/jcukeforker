@@ -35,5 +35,14 @@ module JCukeForker
       task_manager.instance_variable_get(:@worker_sockets)[worker_path] = mock_socket
       task_manager.on_worker_dead worker_path
     end
+
+    it "can send '__KILL__' when there are no tasks left" do
+
+      expect(mock_socket).to receive(:puts).with('__KILL__')
+
+      task_manager = TaskManager.new
+      task_manager.instance_variable_get(:@worker_sockets)[worker_path] = mock_socket
+      task_manager.on_task_finished worker_path, nil, nil
+    end
   end
 end
