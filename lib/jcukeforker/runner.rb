@@ -82,7 +82,7 @@ module JCukeForker
       status_server = StatusServer.new '6333'
       worker_dir = "/tmp/jcukeforker-#{SecureRandom.hex 4}"
       FileUtils.mkdir_p worker_dir
-      processes = create_processes max, '6333', worker_dir
+      processes = create_processes max, '6333', worker_dir, opts[:vnc]
 
       runner = Runner.new status_server, processes, worker_dir
 
@@ -116,18 +116,30 @@ module JCukeForker
 
     private
 
-    def self.create_processes(max, status_path, worker_dir)
+    def self.create_processes(max, status_path, worker_dir, vnc = false)
       worker_file = "#{File.expand_path File.dirname(__FILE__)}/worker.rb"
-      (1..max).inject([]){|l, i| l << ChildProcess.build('ruby', worker_file, status_path, "#{worker_dir}/worker-#{i}")}
+
+      (1..max).inject([]) do |l, i|
+        process_args = %W[ruby #{worker_file} #{status_path} #{worker_dir}/worker-#{i}]
+        process_args << vnc.to_s if vnc
+        l << ChildProcess.build(*process_args)
+      end
     end
 
     def start
-      @processes.each &:start
       fire :on_run_starting
+      @status_server.async.run
+      # avoid race condition when creating vnc displays
+      @processes.each do |process|
+        process.start
+        loop do
+          break if process.alive?
+          sleep 0.3
+        end
+      end
     end
 
     def process
-      @status_server.async.run
       @processes.each &:wait
     end
 

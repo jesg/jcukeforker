@@ -4,9 +4,6 @@ module JCukeForker
     def on_run_starting
     end
 
-    def on_worker_register(worker_path)
-    end
-
     def on_worker_waiting(worker_path)
     end
 
@@ -43,10 +40,10 @@ module JCukeForker
     def on_display_released(server)
     end
 
-    def on_display_starting(server)
+    def on_display_starting(worker_path, display)
     end
 
-    def on_display_stopping(server)
+    def on_display_stopping(worker_path, display)
     end
 
     def on_eta(time, remaining, finished)

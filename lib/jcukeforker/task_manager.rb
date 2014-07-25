@@ -35,6 +35,10 @@ module JCukeForker
       task = @tasks.shift || '__KILL__'
       task = task.to_json if task.is_a? Hash
 
+      if task.empty?
+        puts "-----#{worker_path}...EMPTY TASK!"
+      end
+
       @worker_sockets[worker_path].puts(task)
     end
   end

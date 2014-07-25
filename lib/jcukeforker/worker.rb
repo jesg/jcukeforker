@@ -1,23 +1,23 @@
 require 'socket'
 require 'securerandom'
 require 'json'
-
-status_path = $ARGV[0]
-task_path = $ARGV[1]
+require 'vnctools'
 
 module JCukeForker
   class Worker
 
     attr_reader :feature, :format, :out
 
-    def initialize(status_path, task_path)
+    def initialize(status_path, task_path, vnc = nil)
       @status_path = status_path
       @task_path = task_path
+      @vnc = vnc
       @status_socket = TCPSocket.new 'localhost', status_path
     end
 
     def register
       @worker_server = UNIXServer.new @task_path
+      start_vnc_server
       update_status :on_worker_register
     end
 
@@ -30,13 +30,18 @@ module JCukeForker
       worker_socket = @worker_server.accept
       loop do
         raw_message = worker_socket.gets
+        if raw_message.nil? then
+          sleep 0.3
+          next
+        end
         if raw_message.strip == '__KILL__'
+          stop_vnc_server
           update_status :on_worker_dead
           break
         end
         set_state raw_message
         update_status :on_task_starting, feature
-        status = execute_cucumber raw_message
+        status = execute_cucumber
         update_status :on_task_finished, feature, status
       end
     end
@@ -72,6 +77,24 @@ module JCukeForker
       args
     end
 
+    private
+
+    def start_vnc_server
+      return unless @vnc
+
+      @vnc_server = VncTools::Server.new
+      @vnc_server.start
+      ENV['DISPLAY'] = @vnc_server.display
+      update_status :on_display_starting, @vnc_server.display
+    end
+
+    def stop_vnc_server
+      return unless @vnc
+
+      @vnc_server.stop(force = true)
+      update_status :on_display_stopping, @vnc_server.display
+    end
+
     def set_state(raw_message)
       json_obj = JSON.parse raw_message
       @format = json_obj['format']
@@ -96,7 +119,7 @@ module JCukeForker
   end
 end
 
-worker = JCukeForker::Worker.new status_path, task_path
+worker = JCukeForker::Worker.new *$ARGV
 worker.register
 worker.run
 worker.close

@@ -45,12 +45,12 @@ module JCukeForker
       log.info "[    display #{server.display.to_s.ljust(3)}   ] released"
     end
 
-    def on_display_starting(server)
-      log.info "[    display #{server.display.to_s.ljust(3)}   ] starting"
+    def on_display_starting(worker_path, display)
+      log.info "[    display #{display.to_s.ljust(3)}   ] starting"
     end
 
-    def on_display_stopping(server)
-      log.info "[    display #{server.display.to_s.ljust(3)}   ] stopping"
+    def on_display_stopping(worker_path, display)
+      log.info "[    display #{display.to_s.ljust(3)}   ] stopping"
     end
 
     def on_eta(eta, remaining, finished)
