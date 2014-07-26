@@ -18,8 +18,6 @@ module JCukeForker
 end
 
 require 'jcukeforker/abstract_listener'
-require 'jcukeforker/vnc_listener'
-require 'jcukeforker/recording_vnc_listener'
 require 'jcukeforker/logging_listener'
 require 'jcukeforker/runner'
 require 'jcukeforker/scenarios'

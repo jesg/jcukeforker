@@ -2,22 +2,31 @@ require 'socket'
 require 'securerandom'
 require 'json'
 require 'vnctools'
+require 'observer'
+require 'childprocess'
+require_relative './abstract_listener'
+require_relative './vnc_listener'
+require_relative './recording_vnc_listener'
 
 module JCukeForker
   class Worker
+    include Observable
 
     attr_reader :feature, :format, :out
 
-    def initialize(status_path, task_path, vnc = nil)
+    def initialize(status_path, task_path, vnc = nil, recorder = nil)
       @status_path = status_path
       @task_path = task_path
-      @vnc = vnc
+      if vnc
+        vnc_listener = JCukeForker::VncListener.new(self, JSON.parse(vnc))
+        add_observer vnc_listener
+        add_observer JCukeForker::RecordingVncListener.new(self, JSON.parse(recorder)) if recorder
+      end
       @status_socket = TCPSocket.new 'localhost', status_path
     end
 
     def register
       @worker_server = UNIXServer.new @task_path
-      start_vnc_server
       update_status :on_worker_register
     end
 
@@ -35,7 +44,6 @@ module JCukeForker
           next
         end
         if raw_message.strip == '__KILL__'
-          stop_vnc_server
           update_status :on_worker_dead
           break
         end
@@ -50,6 +58,8 @@ module JCukeForker
       message = [meth, @task_path]
       message += args
 
+      changed
+      notify_observers *message
       @status_socket.puts(message.to_json)
     end
 
@@ -78,22 +88,6 @@ module JCukeForker
     end
 
     private
-
-    def start_vnc_server
-      return unless @vnc
-
-      @vnc_server = VncTools::Server.new
-      @vnc_server.start
-      ENV['DISPLAY'] = @vnc_server.display
-      update_status :on_display_starting, @vnc_server.display
-    end
-
-    def stop_vnc_server
-      return unless @vnc
-
-      @vnc_server.stop(force = true)
-      update_status :on_display_stopping, @vnc_server.display
-    end
 
     def set_state(raw_message)
       json_obj = JSON.parse raw_message

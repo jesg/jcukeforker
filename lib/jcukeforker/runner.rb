@@ -52,26 +52,6 @@ module JCukeForker
       if opts[:log]
         listeners << LoggingListener.new
       end
-#
-#      if vnc = opts[:vnc]
-#        if vnc.kind_of?(Class)
-#          vnc_pool = VncTools::ServerPool.new(max, vnc)
-#        else
-#          vnc_pool = VncTools::ServerPool.new(max)
-#        end
-#
-#        listener = VncListener.new(vnc_pool)
-#
-#        if record = opts[:record]
-#          if record.kind_of?(Hash)
-#            listeners << RecordingVncListener.new(listener, record)
-#          else
-#            listeners << RecordingVncListener.new(listener)
-#          end
-#        else
-#          listeners << listener
-#        end
-#      end
 
       task_manager = TaskManager.new
       features.each do |feature|
@@ -82,14 +62,13 @@ module JCukeForker
       status_server = StatusServer.new '6333'
       worker_dir = "/tmp/jcukeforker-#{SecureRandom.hex 4}"
       FileUtils.mkdir_p worker_dir
-      processes = create_processes max, '6333', worker_dir, opts[:vnc]
+      processes = create_processes(max, '6333', worker_dir, opts[:vnc], opts[:record])
 
       runner = Runner.new status_server, processes, worker_dir
 
       listeners.each { |l|
         status_server.add_observer l
         runner.add_observer l
-#        vnc_pool.add_observer l if opts[:vnc]
       }
 
       runner
@@ -116,26 +95,29 @@ module JCukeForker
 
     private
 
-    def self.create_processes(max, status_path, worker_dir, vnc = false)
+    def self.create_processes(max, status_path, worker_dir, vnc = false, record = false)
       worker_file = "#{File.expand_path File.dirname(__FILE__)}/worker.rb"
 
       (1..max).inject([]) do |l, i|
         process_args = %W[ruby #{worker_file} #{status_path} #{worker_dir}/worker-#{i}]
-        process_args << vnc.to_s if vnc
-        l << ChildProcess.build(*process_args)
+        if vnc
+          vnc = {} unless vnc.is_a? Hash
+          record = {} unless record.is_a? Hash
+          process_args << vnc.to_json
+          process_args << record.to_json if record
+        end
+        process = ChildProcess.build(*process_args)
+        l << process
       end
     end
 
     def start
-      fire :on_run_starting
       @status_server.async.run
-      # avoid race condition when creating vnc displays
+      fire :on_run_starting
+
       @processes.each do |process|
         process.start
-        loop do
-          break if process.alive?
-          sleep 0.3
-        end
+        sleep 0.3  #  ease vnc race condition
       end
     end
 

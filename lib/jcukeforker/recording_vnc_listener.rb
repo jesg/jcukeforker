@@ -1,57 +1,53 @@
+
 module JCukeForker
   class RecordingVncListener < AbstractListener
-    extend Forwardable
 
-    def_delegators :@listener, :on_run_starting, :on_worker_finished, :on_worker_forked,
-                              :on_run_interrupted, :on_run_finished, :on_display_fetched,
-                              :on_display_released, :on_display_starting, :on_display_stopping,
-                              :on_eta
-
-
-    def initialize(listener, opts = {})
-      @listener = listener
-      @ext      = opts[:codec] || "mp4"
+    def initialize(worker, opts = {})
+      @ext      = opts[:codec] || "webm"
       @options  = opts
+      @worker = worker
 
-      @recorders = []
+      @recorder = nil
     end
 
-    def on_worker_starting(worker)
-      @listener.on_worker_starting(worker)
+    def on_task_starting(worker_path, feature)
 
-      @recorders << worker.data.recorder = recorder_for(worker)
-      worker.data.recorder.start
+      @recorder = recorder_for(feature)
+      @recorder.start
     end
 
-    def on_worker_finished(worker)
-      recorder = worker.data.recorder
-      recorder.stop
-
-      unless worker.failed?
-        FileUtils.rm_rf recorder.output
+    def on_task_finished(worker, feature, status)
+      if @recorder.crashed?
+        raise 'ffmpeg failed'
       end
 
-      @recorders.delete(recorder)
-      worker.data.recorder = nil
+      @recorder.stop
 
-      @listener.on_worker_finished(worker)
+      @recorder = nil
     end
 
-    def on_run_interrupted
-      @listener.on_run_interrupted
-
-      @recorders.each do |recorder|
-        recorder.stop rescue nil
-      end
+    def on_worker_dead(worker_path)
+      @recorder && @recorder.stop
     end
 
     private
 
-    def recorder_for(worker)
-      display = worker.data.vnc.display
-      output  = File.join(worker.out, "#{worker.basename}.#{@ext}")
+    def recorder_for(feature)
+      output  = File.join(@worker.out, "#{feature.gsub(/\W/, '_')}.#{@ext}")
 
-      VncTools::Recorder.new display, output, @options
+      process = ChildProcess.build(
+        'ffmpeg',
+        '-an',
+        '-y',
+        '-f', 'x11grab',
+        '-r', @options[:frame_rate] || '5',
+        '-s', @options[:frame_size] || '1024x768',
+        '-i', ENV['DISPLAY'],
+        '-vcodec', @options[:codec] || 'vp8',
+        output
+      )
+      process.io.stdout = process.io.stderr = File.open('/dev/null', 'w')
+      process
     end
 
   end # RecordingVncListener
