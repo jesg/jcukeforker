@@ -20,7 +20,11 @@ module JCukeForker
       if vnc
         vnc_listener = JCukeForker::VncListener.new(self, JSON.parse(vnc))
         add_observer vnc_listener
-        add_observer JCukeForker::RecordingVncListener.new(self, JSON.parse(recorder)) if recorder
+        if recorder
+          config = JSON.parse(recorder)
+          config[:geometry] = vnc_listener.geometry
+          add_observer JCukeForker::RecordingVncListener.new(self, config)
+        end
       end
       @status_socket = TCPSocket.new 'localhost', status_path
     end

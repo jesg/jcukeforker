@@ -41,7 +41,7 @@ module JCukeForker
         '-y',
         '-f', 'x11grab',
         '-r', @options[:frame_rate] || '5',
-        '-s', @options[:frame_size] || '1024x768',
+        '-s', @options[:geometry],             # should be consistent with vnc
         '-i', ENV['DISPLAY'],
         '-vcodec', @options[:codec] || 'vp8',
         output

@@ -4,13 +4,14 @@ module JCukeForker
     def initialize(status, opts = {})
       @random = Random.new
       @status = status
+      @opts = opts
     end
 
     def on_worker_register(worker_path)
       # handle race condition in vnc
       loop do
         begin
-          @server = VncTools::Server.new
+          @server = ConfigurableVncServer.new @opts
           @server.start
           ENV['DISPLAY'] = @server.display
           break
