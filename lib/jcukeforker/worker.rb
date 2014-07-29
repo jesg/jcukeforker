@@ -4,6 +4,7 @@ require 'json'
 require 'vnctools'
 require 'observer'
 require 'childprocess'
+require_relative './configurable_vnc_server'
 require_relative './abstract_listener'
 require_relative './vnc_listener'
 require_relative './recording_vnc_listener'
@@ -18,11 +19,12 @@ module JCukeForker
       @status_path = status_path
       @task_path = task_path
       if vnc
-        vnc_listener = JCukeForker::VncListener.new(self, JSON.parse(vnc))
+        vnc_config = JSON.parse(vnc)
+        vnc_listener = JCukeForker::VncListener.new(self, vnc_config)
         add_observer vnc_listener
         if recorder
           config = JSON.parse(recorder)
-          config[:geometry] = vnc_listener.geometry
+          config[:geometry] = vnc_config[:geometry] || ConfigurableVncServer::DEFAULT_OPTIONS[:geometry]
           add_observer JCukeForker::RecordingVncListener.new(self, config)
         end
       end
@@ -116,8 +118,3 @@ module JCukeForker
     end
   end
 end
-
-worker = JCukeForker::Worker.new *$ARGV
-worker.register
-worker.run
-worker.close

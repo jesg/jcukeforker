@@ -96,7 +96,7 @@ module JCukeForker
     private
 
     def self.create_processes(max, status_path, worker_dir, vnc = false, record = false)
-      worker_file = "#{File.expand_path File.dirname(__FILE__)}/worker.rb"
+      worker_file = "#{File.expand_path File.dirname(__FILE__)}/worker_script.rb"
 
       (1..max).inject([]) do |l, i|
         process_args = %W[ruby #{worker_file} #{status_path} #{worker_dir}/worker-#{i}]

@@ -3,8 +3,8 @@ module JCukeForker
   class ConfigurableVncServer < VncTools::Server
 
     DEFAULT_OPTIONS = {
-      :geometry => '1024x768'
-      :depth => '24'
+      :geometry => '1024x768',
+      :depth => '24',
       :dpi => '96'
     }
 
