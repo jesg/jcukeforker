@@ -62,9 +62,19 @@ module JCukeForker
       status_server = StatusServer.new '6333'
       worker_dir = "/tmp/jcukeforker-#{SecureRandom.hex 4}"
       FileUtils.mkdir_p worker_dir
-      processes = create_processes(max, '6333', worker_dir, opts[:vnc], opts[:record])
 
-      runner = Runner.new status_server, processes, worker_dir
+      vnc_pool = nil
+      if vnc = opts[:vnc]
+       if vnc.kind_of?(Class)
+         vnc_pool = VncTools::ServerPool.new(max, vnc)
+       else
+         vnc_pool = VncTools::ServerPool.new(max)
+       end
+      end
+
+      processes = create_processes(max, '6333', worker_dir, vnc_pool, opts[:record])
+
+      runner = Runner.new status_server, processes, worker_dir, vnc_pool
 
       listeners.each { |l|
         status_server.add_observer l
@@ -74,10 +84,11 @@ module JCukeForker
       runner
     end
 
-    def initialize(status_server, processes, worker_dir)
+    def initialize(status_server, processes, worker_dir, vnc_pool)
       @status_server = status_server
       @processes = processes
       @worker_dir = worker_dir
+      @vnc_pool = vnc_pool
     end
 
     def run
@@ -95,18 +106,18 @@ module JCukeForker
 
     private
 
-    def self.create_processes(max, status_path, worker_dir, vnc = false, record = false)
+    def self.create_processes(max, status_path, worker_dir, vnc_pool = nil, record = false)
       worker_file = "#{File.expand_path File.dirname(__FILE__)}/worker_script.rb"
 
       (1..max).inject([]) do |l, i|
         process_args = %W[ruby #{worker_file} #{status_path} #{worker_dir}/worker-#{i}]
-        if vnc
-          vnc = {} unless vnc.is_a? Hash
-          record = {} unless record.is_a? Hash
-          process_args << vnc.to_json
-          process_args << record.to_json if record
+        if vnc_pool && record
+          record = {} unless record.kind_of? Hash
+          process_args << record.to_json
         end
         process = ChildProcess.build(*process_args)
+        process.io.stdout = process.io.stderr = $stdout
+        process.environment['DISPLAY'] = vnc_pool.get.display if vnc_pool
         l << process
       end
     end
@@ -115,10 +126,7 @@ module JCukeForker
       @status_server.async.run
       fire :on_run_starting
 
-      @processes.each do |process|
-        process.start
-        sleep 0.3  #  ease vnc race condition
-      end
+      @processes.each &:start
     end
 
     def process
@@ -128,6 +136,7 @@ module JCukeForker
     def stop
       @status_server.shutdown
     ensure # catch potential second Interrupt
+      @vnc_pool.stop
       FileUtils.rm_r @worker_dir
       #fire :on_run_finished, @queue.has_failures?
     end

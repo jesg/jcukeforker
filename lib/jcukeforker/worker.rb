@@ -1,12 +1,9 @@
 require 'socket'
 require 'securerandom'
 require 'json'
-require 'vnctools'
 require 'observer'
 require 'childprocess'
-require_relative './configurable_vnc_server'
 require_relative './abstract_listener'
-require_relative './vnc_listener'
 require_relative './recording_vnc_listener'
 
 module JCukeForker
@@ -15,18 +12,12 @@ module JCukeForker
 
     attr_reader :feature, :format, :out
 
-    def initialize(status_path, task_path, vnc = nil, recorder = nil)
+    def initialize(status_path, task_path, recorder = nil)
       @status_path = status_path
       @task_path = task_path
-      if vnc
-        vnc_config = JSON.parse(vnc)
-        vnc_listener = JCukeForker::VncListener.new(self, vnc_config)
-        add_observer vnc_listener
-        if recorder
-          config = JSON.parse(recorder)
-          config[:geometry] = vnc_config[:geometry] || ConfigurableVncServer::DEFAULT_OPTIONS[:geometry]
-          add_observer JCukeForker::RecordingVncListener.new(self, config)
-        end
+      if ENV['DISPLAY'] && recorder
+        config = JSON.parse(recorder)
+        add_observer JCukeForker::RecordingVncListener.new(self, config)
       end
       @status_socket = TCPSocket.new 'localhost', status_path
     end
@@ -104,12 +95,12 @@ module JCukeForker
     end
 
     def execute_cucumber
-      FileUtils.mkdir_p(out) unless File.exist? out
+      fileutils.mkdir_p(out) unless file.exist? out
 
       $stdout.reopen stdout
       $stderr.reopen stderr
 
-      failed = Cucumber::Cli::Main.execute args
+      failed = cucumber::cli::main.execute args
 
       $stdout.flush
       $stderr.flush
