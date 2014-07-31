@@ -20,6 +20,7 @@ module JCukeForker
         add_observer JCukeForker::RecordingVncListener.new(self, config)
       end
       @status_socket = TCPSocket.new 'localhost', status_path
+      @status = nil
     end
 
     def register
@@ -58,6 +59,10 @@ module JCukeForker
       changed
       notify_observers *message
       @status_socket.puts(message.to_json)
+    end
+
+    def failed?
+      @status.nil? || @status
     end
 
     def output
@@ -100,12 +105,12 @@ module JCukeForker
       $stdout.reopen stdout
       $stderr.reopen stderr
 
-      failed = cucumber::cli::main.execute args
+      @status = cucumber::cli::main.execute args
 
       $stdout.flush
       $stderr.flush
 
-      failed
+      @status
     end
   end
 end

@@ -2,6 +2,8 @@
 module JCukeForker
   class RecordingVncListener < AbstractListener
 
+    attr_reader :output
+
     def initialize(worker, opts = {})
       @ext      = opts[:codec] || "webm"
       @options  = opts
@@ -21,6 +23,10 @@ module JCukeForker
         raise 'ffmpeg failed'
       end
 
+      unless worker.failed?
+        FileUtils.rm_rf output
+      end
+
       @recorder.stop
 
       @recorder = nil
@@ -33,7 +39,7 @@ module JCukeForker
     private
 
     def recorder_for(feature)
-      output  = File.join(@worker.out, "#{feature.gsub(/\W/, '_')}.#{@ext}")
+      @output  = File.join(@worker.out, "#{feature.gsub(/\W/, '_')}.#{@ext}")
 
       process = ChildProcess.build(
         'ffmpeg',
@@ -41,10 +47,10 @@ module JCukeForker
         '-y',
         '-f', 'x11grab',
         '-r', @options[:frame_rate] || '5',
-        '-s', @options[:geometry] || '1024x768',
+        '-s', @options[:frame_size] || '1024x768',
         '-i', ENV['DISPLAY'],
         '-vcodec', @options[:codec] || 'vp8',
-        output
+        @output
       )
       process.io.stdout = process.io.stderr = File.open('/dev/null', 'w')
       process
