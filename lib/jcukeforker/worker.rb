@@ -105,7 +105,7 @@ module JCukeForker
       $stdout.reopen stdout
       $stderr.reopen stderr
 
-      @status = cucumber::cli::main.execute args
+      @status = Cucumber::Cli::Main.execute args
 
       $stdout.flush
       $stderr.flush
