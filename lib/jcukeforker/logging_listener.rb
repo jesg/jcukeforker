@@ -37,27 +37,6 @@ module JCukeForker
       log.info "[    run           ] interrupted - please wait"
     end
 
-    def on_display_fetched(server)
-      log.info "[    display #{server.display.to_s.ljust(3)}   ] fetched"
-    end
-
-    def on_display_released(server)
-      log.info "[    display #{server.display.to_s.ljust(3)}   ] released"
-    end
-
-    def on_display_starting(worker_path, display)
-      log.info "[    display #{display.to_s.ljust(3)}   ] starting"
-    end
-
-    def on_display_stopping(worker_path, display)
-      log.info "[    display #{display.to_s.ljust(3)}   ] stopping"
-    end
-
-    def on_eta(eta, remaining, finished)
-      counts = "#{remaining}/#{finished}".ljust(6)
-      log.info "[    eta     #{counts}] #{eta.strftime TIME_FORMAT}"
-    end
-
     private
 
     def status_string(failed)
@@ -77,5 +56,4 @@ module JCukeForker
       )
     end
   end # LoggingListener
-
 end # CukeForker
