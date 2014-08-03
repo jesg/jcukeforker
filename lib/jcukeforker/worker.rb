@@ -16,7 +16,7 @@ module JCukeForker
       @status_path = status_path
       @task_path = task_path
       if ENV['DISPLAY'] && recorder
-        config = JSON.parse(recorder)
+        config = recorder ? {} : JSON.parse(recorder)
         add_observer JCukeForker::RecordingVncListener.new(self, config)
       end
       @status_socket = TCPSocket.new 'localhost', status_path
@@ -100,7 +100,7 @@ module JCukeForker
     end
 
     def execute_cucumber
-      fileutils.mkdir_p(out) unless file.exist? out
+      FileUtils.mkdir_p(out) unless File.exist? out
 
       $stdout.reopen stdout
       $stderr.reopen stderr
