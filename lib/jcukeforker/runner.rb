@@ -74,7 +74,7 @@ module JCukeForker
 
       processes = create_processes(max, '6333', worker_dir, vnc_pool, opts[:record])
 
-      runner = Runner.new status_server, processes, worker_dir, vnc_pool
+      runner = Runner.new status_server, processes, worker_dir, vnc_pool, delay
 
       listeners.each { |l|
         status_server.add_observer l
@@ -84,11 +84,12 @@ module JCukeForker
       runner
     end
 
-    def initialize(status_server, processes, worker_dir, vnc_pool)
+    def initialize(status_server, processes, worker_dir, vnc_pool, delay)
       @status_server = status_server
       @processes = processes
       @worker_dir = worker_dir
       @vnc_pool = vnc_pool
+      @delay = delay
     end
 
     def run
@@ -126,7 +127,10 @@ module JCukeForker
       @status_server.async.run
       fire :on_run_starting
 
-      @processes.each &:start
+      @processes.each do |process|
+        process.start
+        sleep @delay
+      end
     end
 
     def process
