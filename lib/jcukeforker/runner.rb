@@ -140,7 +140,7 @@ module JCukeForker
     def stop
       @status_server.shutdown
     ensure # catch potential second Interrupt
-      @vnc_pool.stop
+      @vnc_pool.stop if @vnc_pool
       FileUtils.rm_r @worker_dir
       #fire :on_run_finished, @queue.has_failures?
     end

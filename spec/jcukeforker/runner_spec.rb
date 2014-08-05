@@ -54,7 +54,8 @@ module JCukeForker
       let(:status_server) { double(StatusServer, :async => status_server0, :shutdown => nil) }
       let(:process) { double(ChildProcess, :start => nil, :wait => nil) }
       let(:work_dir) { '/tmp/jcukeforker-testdir' }
-      let(:runner)   { Runner.new(status_server, [process], work_dir) }
+      let(:vnc_pool) { double(VncTools::ServerPool, :stop => nil) }
+      let(:runner)   { Runner.new(status_server, [process], work_dir, vnc_pool, 0) }
 
       it "processes the queue" do
         runner.add_observer listener
