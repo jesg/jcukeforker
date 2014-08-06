@@ -1,6 +1,8 @@
 require 'socket'
 require 'securerandom'
 require 'json'
+require 'fileutils'
+require 'cucumber/cli/main'
 require 'observer'
 require 'childprocess'
 require_relative './abstract_listener'
@@ -105,7 +107,10 @@ module JCukeForker
       $stdout.reopen stdout
       $stderr.reopen stderr
 
-      @status = Cucumber::Cli::Main.execute args
+      begin
+        @status = Cucumber::Cli::Main.execute args
+      rescue SystemExit
+      end
 
       $stdout.flush
       $stderr.flush
