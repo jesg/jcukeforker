@@ -7,7 +7,7 @@ module JCukeForker
   # and 'opts' is a Hash of options:
   #
   #   :max        => Fixnum            number of workers (default: 2, pass 0 for unlimited)
-  #   :vnc        => true/false,Class  children are launched with DISPLAY set from a VNC server pool,
+  #   :vnc        => true/false,Class,Array  children are launched with DISPLAY set from a VNC server pool,
   #                                    where the size of the pool is equal to :max. If passed a Class instance,
   #                                    this will be passed as the second argument to VncTools::ServerPool.
   #   :record     => true/false,Hash   whether to record a video of failed tests (requires ffmpeg)
@@ -65,7 +65,9 @@ module JCukeForker
 
       vnc_pool = nil
       if vnc = opts[:vnc]
-       if vnc.kind_of?(Class)
+       if vnc.kind_of?(Array)
+         vnc_pool = VncTools::ServerPool.new(max, ConfigurableVncServer.create_class(vnc))
+       elsif vnc.kind_of?(Class)
          vnc_pool = VncTools::ServerPool.new(max, vnc)
        else
          vnc_pool = VncTools::ServerPool.new(max)

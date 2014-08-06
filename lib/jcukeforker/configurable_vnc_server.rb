@@ -1,25 +1,14 @@
 
 module JCukeForker
-  class ConfigurableVncServer < VncTools::Server
+  class ConfigurableVncServer
 
-    DEFAULT_OPTIONS = {
-      :geometry => '1024x768',
-      :depth => '24',
-      :dpi => '96'
-    }
+    def self.create_class(launch_arguments)
+      Class.new(VncTools::Server) do
 
-    attr_reader :geometry, :depth, :dpi
-
-    def initialize(opts = {})
-      opts = DEFAULT_OPTIONS.dup.merge(opts)
-
-      @geometry = opts[:geometry]
-      @depth = opts[:depth]
-      @dpi = opts[:dpi]
-    end
-
-    def launch_arguments
-      %W[-geometry #{geometry} -depth #{depth} -dpi #{dpi}]
+        define_method :launch_arguments do
+          launch_arguments
+        end
+      end
     end
   end
 end
