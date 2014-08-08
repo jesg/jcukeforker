@@ -14,7 +14,7 @@ module JCukeForker
   class Worker
     include Observable
 
-    attr_reader :feature, :format, :out
+    attr_reader :feature, :format, :out, :basename
 
     def initialize(status_path, task_path, recorder = nil)
       @status_path = status_path
@@ -81,10 +81,6 @@ module JCukeForker
       File.join out, "#{basename}.stderr"
     end
 
-    def basename
-      @basename ||= feature.gsub(/\W/, '_')
-    end
-
     def args
       args = %W[--format #{format} --out #{output}]
       args += @extra_args
@@ -102,6 +98,7 @@ module JCukeForker
       @feature = json_obj['feature']
       @extra_args = json_obj['extra_args']
       @out = json_obj['out']
+      @basename = feature.gsub(/\W/, '_')
     end
 
     def execute_cucumber

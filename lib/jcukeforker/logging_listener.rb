@@ -39,8 +39,8 @@ module JCukeForker
 
     private
 
-    def status_string(failed)
-      failed == 'false' ? 'failed' : 'passed'
+    def status_string(status)
+      status ? 'passed' : 'failed'
     end
 
     def worker_id(worker_path)
