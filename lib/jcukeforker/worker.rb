@@ -94,6 +94,7 @@ module JCukeForker
     private
 
     def set_state(raw_message)
+      @status = nil
       json_obj = JSON.parse raw_message
       @format = json_obj['format']
       @feature = json_obj['feature']
