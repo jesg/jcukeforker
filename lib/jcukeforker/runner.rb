@@ -104,7 +104,8 @@ module JCukeForker
     rescue Interrupt
       fire :on_run_interrupted
       stop
-    rescue StandardError
+    rescue StandardError => e
+      $stderr.puts e.backtrace
       fire :on_run_interrupted
       stop
       raise
