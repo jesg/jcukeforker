@@ -6,8 +6,8 @@ Gem::Specification.new do |s|
   s.name        = "jcukeforker"
   s.version     = JCukeForker::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ["Jari Bakken"]
-  s.email       = ["jari.bakken@gmail.com"]
+  s.authors     = ["Jason Gowan", "Jari Bakken"]
+  s.email       = ["gowanjason@gmail.com"]
   s.homepage    = ""
   s.summary     = %q{Library to maintain a forking queue of Cucumber processes}
   s.description = %q{Library to maintain a forking queue of Cucumber processes, with optional VNC displays.}

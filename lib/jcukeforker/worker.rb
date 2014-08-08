@@ -108,8 +108,9 @@ module JCukeForker
       $stderr.reopen stderr
 
       begin
-        @status = Cucumber::Cli::Main.execute args
-      rescue SystemExit
+        Cucumber::Cli::Main.execute args
+      rescue SystemExit => e
+        @status = e.success?
       end
 
       $stdout.flush

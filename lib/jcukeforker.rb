@@ -23,6 +23,7 @@ require 'jcukeforker/runner'
 require 'jcukeforker/scenarios'
 require 'jcukeforker/status_server'
 require 'jcukeforker/task_manager'
+require 'jcukeforker/configurable_vnc_server'
 
 require 'jcukeforker/formatters/scenario_line_logger'
 require 'jcukeforker/formatters/junit_scenario_formatter'
