@@ -19,7 +19,8 @@ module JCukeForker
   #   :format     => Symbol            format passed to `cucumber --format` (default: html)
   #   :extra_args => Array             extra arguments passed to cucumber
   #   :delay      => Numeric           seconds to sleep between each worker is started (default: 0)
-  #
+  #   :port       => String            port that the event server runs on
+  #   (default: 6333)
 
   class Runner
     include Observable
@@ -32,7 +33,8 @@ module JCukeForker
       :out    => Dir.pwd,
       :log    => true,
       :format => :html,
-      :delay  => 0
+      :delay  => 0,
+      :port   => '6333'
     }
 
     def self.run(features, opts = {})
@@ -48,6 +50,7 @@ module JCukeForker
       listeners  = Array(opts[:notify])
       extra_args = Array(opts[:extra_args])
       delay      = opts[:delay]
+      port       = opts[:port]
 
       if opts[:log]
         listeners << LoggingListener.new
@@ -59,7 +62,7 @@ module JCukeForker
       end
 
       listeners << task_manager
-      status_server = StatusServer.new '6333'
+      status_server = StatusServer.new port
       worker_dir = "/tmp/jcukeforker-#{SecureRandom.hex 4}"
       FileUtils.mkdir_p worker_dir
 
@@ -74,7 +77,7 @@ module JCukeForker
        end
       end
 
-      processes = create_processes(max, '6333', worker_dir, vnc_pool, opts[:record])
+      processes = create_processes(max, port, worker_dir, vnc_pool, opts[:record])
 
       runner = Runner.new status_server, processes, worker_dir, vnc_pool, delay
 
