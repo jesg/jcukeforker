@@ -14,6 +14,10 @@ require "securerandom"
 require "celluloid/io"
 require "celluloid/autostart"
 
+unless ENV['DEBUG']
+  Celluloid.logger = Logger.new('/dev/null')
+end
+
 module JCukeForker
 end
 
