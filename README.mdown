@@ -24,7 +24,7 @@ to avoid this.
 
     # parallelize per scenario, with one JUnit XML file per scenario.
     JCukeForker::Runner.run JCukeForker::Scenarios.tagged(%W[@edition ~@wip])
-                           :extra_args => %W[-f CukeForker::Formatters::JunitScenarioFormatter --out results/junit]
+                           :extra_args => %W[-f JCukeForker::Formatters::JunitScenarioFormatter --out results/junit]
 ```
 
 Note on Patches/Pull Requests
