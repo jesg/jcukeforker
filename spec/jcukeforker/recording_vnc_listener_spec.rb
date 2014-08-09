@@ -50,15 +50,14 @@ module JCukeForker
       recorder.stub(:stop)
       listener.instance_variable_set(:@recorder, recorder)
 
-      worker.should_receive(:failed?).and_return(false)
       listener.should_receive(:output).and_return("./foo.mp4")
       FileUtils.should_receive(:rm_rf).with("./foo.mp4")
 
-      listener.on_task_finished worker, nil, nil
+      listener.on_task_finished worker, nil, true
     end
 
     it "passes along options to recorder" do
-      listener = RecordingVncListener.new worker, :codec => "flv"
+      listener = RecordingVncListener.new worker, 'codec' => "flv", 'ext' => 'flv'
       env = ENV['DISPLAY']
       ENV['DISPLAY']= ':1'
       ChildProcess.should_receive(:build).with(

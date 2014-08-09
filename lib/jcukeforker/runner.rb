@@ -119,8 +119,11 @@ module JCukeForker
       (1..max).inject([]) do |l, i|
         process_args = %W[ruby #{worker_file} #{status_path} #{worker_dir}/worker-#{i}]
         if vnc_pool && record
-          record = {} unless record.kind_of? Hash
-          process_args << record.to_json
+          if record.kind_of? Hash
+            process_args << record.to_json
+          else
+            process_args << {}.to_json
+          end
         end
         process = ChildProcess.build(*process_args)
         process.environment['DISPLAY'] = vnc_pool.get.display if vnc_pool

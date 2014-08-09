@@ -5,7 +5,7 @@ module JCukeForker
     attr_reader :output
 
     def initialize(worker, opts = {})
-      @ext      = opts[:codec] || "webm"
+      @ext      = opts['ext'] || "webm"
       @options  = opts
       @worker = worker
 
@@ -23,7 +23,7 @@ module JCukeForker
         raise 'ffmpeg failed'
       end
 
-      unless worker.failed?
+      if status
         FileUtils.rm_rf output
       end
 
@@ -46,10 +46,10 @@ module JCukeForker
         '-an',
         '-y',
         '-f', 'x11grab',
-        '-r', @options[:frame_rate] || '5',
-        '-s', @options[:frame_size] || '1024x768',
+        '-r', @options['frame_rate'] || '5',
+        '-s', @options['frame_size'] || '1024x768',
         '-i', ENV['DISPLAY'],
-        '-vcodec', @options[:codec] || 'vp8',
+        '-vcodec', @options['codec'] || 'vp8',
         @output
       )
       process.io.stdout = process.io.stderr = File.open('/dev/null', 'w')

@@ -20,7 +20,7 @@ module JCukeForker
       @status_path = status_path
       @task_path = task_path
       if ENV['DISPLAY'] && recorder
-        config = recorder ? {} : JSON.parse(recorder)
+        config = JSON.parse(recorder)
         add_observer JCukeForker::RecordingVncListener.new(self, config)
       end
       @status_socket = TCPSocket.new 'localhost', status_path
@@ -112,7 +112,6 @@ module JCukeForker
       rescue SystemExit => e
         @status = e.success?
       end
-      puts failed?
 
       $stdout.flush
       $stderr.flush
