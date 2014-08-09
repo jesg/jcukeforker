@@ -66,7 +66,7 @@ module JCukeForker
     end
 
     def failed?
-      @status.nil? || @status
+      @status.nil? || !@status
     end
 
     def output
@@ -112,6 +112,7 @@ module JCukeForker
       rescue SystemExit => e
         @status = e.success?
       end
+      puts failed?
 
       $stdout.flush
       $stderr.flush
