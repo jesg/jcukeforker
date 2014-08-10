@@ -4,6 +4,8 @@ Forking cukes and VNC displays.
 
 Jcukeforker is a fork of cukeforker desgined for jruby.
 
+[![Gem Version](https://badge.fury.io/rb/jcukeforker.svg)](http://badge.fury.io/rb/jcukeforker)
+
 ### NB!
 
 If you're using cukeforker with selenium-webdriver and Firefox, all versions prior to 2.40 has a bug where custom
@@ -28,10 +30,8 @@ to avoid this.
     
     # setup with vncserver and screen recording
     JCukeForker::Runner.run Dir['features/**/*.feature'],
-                            :vnc       => %W[-geometry 1280x1024 -depth 24 -dpi
-                            96]
-                            :recorder  => {:ext => 'mp4', :codec => 'mpeg4',
-                            :frame_size => '1280x1024', :frame_rate => '5'}
+                            :vnc       => %W[-geometry 1280x1024 -depth 24 -dpi 96]
+                            :recorder  => {:ext => 'mp4', :codec => 'mpeg4', :frame_size => '1280x1024', :frame_rate => '5'}
 ```
 
 Note on Patches/Pull Requests
