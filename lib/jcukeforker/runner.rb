@@ -126,6 +126,8 @@ module JCukeForker
           end
         end
         process = ChildProcess.build(*process_args)
+        process.io.stdout = $stdout
+        process.io.stderr = $stderr
         process.environment['DISPLAY'] = vnc_pool.get.display if vnc_pool
         l << process
       end
