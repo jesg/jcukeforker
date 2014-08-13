@@ -45,6 +45,7 @@ module JCukeForker
       opts = DEFAULT_OPTIONS.dup.merge(opts)
 
       max        = opts[:max]
+      raise ':max must be >= 1' if max < 1
       format     = opts[:format]
       out        = File.join opts[:out]
       listeners  = Array(opts[:notify])
@@ -56,10 +57,8 @@ module JCukeForker
         listeners << LoggingListener.new
       end
 
-      task_manager = TaskManager.new
-      features.each do |feature|
-        task_manager.add({feature: feature, format: format,out: out,extra_args: extra_args})
-      end
+      task_opts = {format: format,out: out,extra_args: extra_args}
+      task_manager = TaskManager.new features, task_opts
 
       listeners << task_manager
       status_server = StatusServer.new port

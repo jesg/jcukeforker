@@ -2,13 +2,10 @@
 module JCukeForker
   class TaskManager < AbstractListener
 
-    def initialize()
-      @tasks = []
+    def initialize(features, opts={})
+      @features = features
+      @opts = opts
       @worker_sockets = {}
-    end
-
-    def add(task)
-      @tasks << task
     end
 
     def on_worker_register(worker_path)
@@ -32,8 +29,10 @@ module JCukeForker
     private
 
     def pop_task(worker_path)
-      task = @tasks.shift || '__KILL__'
-      task = task.to_json if task.is_a? Hash
+      task = '__KILL__'
+      if feature = @features.shift
+        task = @opts.merge(feature: feature).to_json
+      end
 
       @worker_sockets[worker_path].puts(task)
     end
