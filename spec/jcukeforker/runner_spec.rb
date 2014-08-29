@@ -16,7 +16,7 @@ module JCukeForker
         delay     = 1
 
         mock_task_manager = double(TaskManager, :update => nil)
-        mock_status_server = double(StatusServer)
+        mock_status_server = double(StatusServer, :port => nil)
         mock_tasks = Array.new(2) { |n| double("Worker-#{n}") }
 
         TaskManager.should_receive(:new).with(features, {format: format, out: out, extra_args: []}).and_return mock_task_manager

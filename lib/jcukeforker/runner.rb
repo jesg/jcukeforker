@@ -76,7 +76,7 @@ module JCukeForker
        end
       end
 
-      processes = create_processes(max, port, worker_dir, vnc_pool, opts[:record])
+      processes = create_processes(max, status_server.port, worker_dir, vnc_pool, opts[:record])
 
       runner = Runner.new status_server, processes, worker_dir, vnc_pool, delay
 

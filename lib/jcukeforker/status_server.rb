@@ -1,3 +1,4 @@
+require 'socket'
 
 module JCukeForker
   class StatusServer
@@ -5,9 +6,12 @@ module JCukeForker
     include Celluloid::IO
 
     finalizer :shutdown
+    attr_reader :port
 
     def initialize(port = '6333')
-      @server = TCPServer.new 'localhost', port
+      server = ::TCPServer.new 'localhost', port
+      @port = server.connect_address.ip_port
+      @server = TCPServer.from_ruby_server server
     end
 
     def run
