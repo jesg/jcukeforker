@@ -23,5 +23,19 @@ module JCukeForker
 
       worker.register
     end
+
+    context "running a scenario with multiple report formats" do
+      formats = [ :json, :junit ]
+      path = "some/path"
+
+      it "has an output file for each format specified" do
+        json_str = {'format' => formats, 'feature' => 'some/feature:51', 'extra_args' => [], 'out' => path}.to_json
+        worker.send :set_state, json_str
+        expected_args = formats.flat_map do |f|
+          %W[--format #{f} --out #{path}/some_feature_51.#{f}]
+        end
+        worker.args.each_cons(expected_args.size).include?(expected_args).should be_true
+      end
+    end
   end
 end

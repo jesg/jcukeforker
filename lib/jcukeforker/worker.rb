@@ -69,7 +69,8 @@ module JCukeForker
       @status.nil? || !@status
     end
 
-    def output
+    def output(format = nil)
+      format = @format if format.nil?
       File.join out, "#{basename}.#{format}"
     end
 
@@ -82,10 +83,9 @@ module JCukeForker
     end
 
     def args
-      args = %W[--format #{format} --out #{output}]
+      args = Array(format).flat_map { |f| %W[--format #{f} --out #{output(f)}] }
       args += @extra_args
       args << feature
-
       args
     end
 
