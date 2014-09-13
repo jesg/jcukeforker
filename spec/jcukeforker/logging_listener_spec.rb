@@ -36,7 +36,7 @@ I, [#{timestamp}]  INFO -- : [    worker  15    ] failed  : foo/baz
 I, [#{timestamp}]  INFO -- : [    worker  1     ] dead    : /tmp/12sd3-1
 I, [#{timestamp}]  INFO -- : [    worker  15    ] dead    : /tmp/12sd3-15
 I, [#{timestamp}]  INFO -- : [    run           ] interrupted - please wait
-I, [#{timestamp}]  INFO -- : [    run           ] finished, failed
+I, [#{timestamp}]  INFO -- : [    run           ] finished, passed
       OUTPUT
     end
   end # Worker

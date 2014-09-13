@@ -15,7 +15,7 @@ module JCukeForker
         features  = %w[a b]
         delay     = 1
 
-        mock_task_manager = double(TaskManager, :update => nil)
+        mock_task_manager = double(TaskManager, :update => nil, :has_failures? => false)
         mock_status_server = double(StatusServer, :port => nil)
         mock_tasks = Array.new(2) { |n| double("Worker-#{n}") }
 
@@ -52,7 +52,9 @@ module JCukeForker
       let(:process) { double(ChildProcess, :start => nil, :wait => nil) }
       let(:work_dir) { '/tmp/jcukeforker-testdir' }
       let(:vnc_pool) { double(VncTools::ServerPool, :stop => nil) }
-      let(:runner)   { Runner.new(status_server, [process], work_dir, vnc_pool, 0) }
+      let(:mock_task_manager) { double(TaskManager, :update => nil, :has_failures? => false) }
+      let(:runner)   { Runner.new(status_server, [process], work_dir, vnc_pool, 0, mock_task_manager) }
+
 
       it "processes the queue" do
         runner.add_observer listener

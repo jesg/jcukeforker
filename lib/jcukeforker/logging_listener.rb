@@ -29,7 +29,7 @@ module JCukeForker
     end
 
     def on_run_finished(failed)
-      log.info "[    run           ] finished, #{status_string failed}"
+      log.info "[    run           ] finished, #{status_string !failed}"
     end
 
     def on_run_interrupted

@@ -41,5 +41,12 @@ module JCukeForker
       task_manager.instance_variable_get(:@worker_sockets)[worker_path] = mock_socket
       task_manager.on_task_finished worker_path, nil, nil
     end
+
+    it "can detect failure" do
+      task_manager = TaskManager.new []
+      def task_manager.pop_task(*args); end
+      task_manager.on_task_finished worker_path, feature, false
+      task_manager.has_failures?.should == true
+    end
   end
 end

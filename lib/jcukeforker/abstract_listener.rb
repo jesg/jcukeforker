@@ -16,37 +16,13 @@ module JCukeForker
     def on_task_finished(worker_path, feature, status)
     end
 
-    def on_worker_forked(worker)
-    end
-
     def on_worker_register(worker_path)
-    end
-
-    def on_worker_waiting(worker_path)
-    end
-
-    def on_worker_dead(worker_path)
     end
 
     def on_run_interrupted
     end
 
     def on_run_finished(failed)
-    end
-
-    def on_display_fetched(server)
-    end
-
-    def on_display_released(server)
-    end
-
-    def on_display_starting(worker_path, display)
-    end
-
-    def on_display_stopping(worker_path, display)
-    end
-
-    def on_eta(time, remaining, finished)
     end
 
     def update(meth, *args)

@@ -78,7 +78,7 @@ module JCukeForker
 
       processes = create_processes(max, status_server.port, worker_dir, vnc_pool, opts[:record])
 
-      runner = Runner.new status_server, processes, worker_dir, vnc_pool, delay
+      runner = Runner.new status_server, processes, worker_dir, vnc_pool, delay, task_manager
 
       listeners.each { |l|
         status_server.add_observer l
@@ -88,12 +88,13 @@ module JCukeForker
       runner
     end
 
-    def initialize(status_server, processes, worker_dir, vnc_pool, delay)
+    def initialize(status_server, processes, worker_dir, vnc_pool, delay, task_manager)
       @status_server = status_server
       @processes = processes
       @worker_dir = worker_dir
       @vnc_pool = vnc_pool
       @delay = delay
+      @task_manager = task_manager
     end
 
     def run
@@ -151,7 +152,7 @@ module JCukeForker
     ensure # catch potential second Interrupt
       @vnc_pool.stop if @vnc_pool
       FileUtils.rm_r @worker_dir
-      #fire :on_run_finished, @queue.has_failures?
+      fire :on_run_finished, @task_manager.has_failures?
     end
 
     def fire(*args)

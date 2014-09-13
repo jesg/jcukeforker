@@ -6,6 +6,7 @@ module JCukeForker
       @features = features
       @opts = opts
       @worker_sockets = {}
+      @failures = false
     end
 
     def on_worker_register(worker_path)
@@ -14,6 +15,7 @@ module JCukeForker
     end
 
     def on_task_finished(worker_path, feature, status)
+      @failures = @failures || !status
       pop_task worker_path
     end
 
@@ -24,6 +26,10 @@ module JCukeForker
 
     def close
       @worker_sockets.each {|k, v| v.close}
+    end
+
+    def has_failures?
+      @failures
     end
 
     private
