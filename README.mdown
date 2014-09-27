@@ -30,7 +30,7 @@ to avoid this.
     
     # setup with vncserver and screen recording
     JCukeForker::Runner.run Dir['features/**/*.feature'],
-                            :vnc       => %W[-geometry 1280x1024 -depth 24 -dpi 96]
+                            :vnc       => %W[-geometry 1280x1024 -depth 24 -dpi 96],
                             :record    => {:ext => 'mp4', :codec => 'mpeg4', :frame_size => '1280x1024', :frame_rate => '5'}
 ```
 
