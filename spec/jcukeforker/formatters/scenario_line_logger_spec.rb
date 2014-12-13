@@ -27,10 +27,12 @@ module JCukeForker::Formatters
       logger = ScenarioLineLogger.new
 
       feature = double("Cucumber::Ast::Feature")
-      location = double("Cucumber::Ast::Location", :line => 4)
+      row = double("Cucumber::Ast::OutlineTable::ExampleRow")
+      cell = double("Cucumber::Ast::Table::Cell", :line => 4)
       feature_element = Cucumber::Ast::ScenarioOutline.new(*Array.new(11) {|a| double(a, :each => true) })
-      feature_element.stub(:location => location)
+      feature_element.stub(:each_example_row).and_yield(row)
 
+      row.should_receive(:instance_variable_get).with(:@cells).and_return([cell])
       feature.should_receive(:file).and_return('features/test1.feature')
       feature_element.should_receive(:source_tags).and_return('')
       feature_element.should_receive(:feature).and_return(feature)

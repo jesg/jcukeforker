@@ -39,7 +39,7 @@ module JCukeForker
       all_scenarios[0].should == "features/test1.feature:2"
       all_scenarios[1].should == "features/test1.feature:5"
       all_scenarios[2].should == "features/test2.feature:3"
-      all_scenarios[3].should == "features/test2.feature:6"
+      all_scenarios[3].should == "features/test2.feature:10"
     end
 
     it "returns all scenarios and their line numbers" do
