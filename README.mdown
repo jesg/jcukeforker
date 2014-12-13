@@ -5,6 +5,7 @@ Forking cukes and VNC displays.
 Jcukeforker is a fork of cukeforker desgined for jruby.
 
 [![Gem Version](https://badge.fury.io/rb/jcukeforker.svg)](http://badge.fury.io/rb/jcukeforker)
+[![Build Status](https://secure.travis-ci.org/jesg/jcukeforker.png)](http://travis-ci.org/jesg/jcukeforker)
 
 ### NB!
 
@@ -27,7 +28,7 @@ to avoid this.
     # parallelize per scenario, with one JUnit XML file per scenario.
     JCukeForker::Runner.run JCukeForker::Scenarios.tagged(%W[@edition ~@wip])
                            :extra_args => %W[-f JCukeForker::Formatters::JunitScenarioFormatter --out results/junit]
-    
+
     # setup with vncserver and screen recording
     JCukeForker::Runner.run Dir['features/**/*.feature'],
                             :vnc       => %W[-geometry 1280x1024 -depth 24 -dpi 96],
@@ -49,4 +50,3 @@ Copyright
 =========
 
 Copyright (c) 2011-2014 Jari Bakken. See LICENSE for details.
-
