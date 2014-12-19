@@ -105,7 +105,7 @@ module JCukeForker
       fire :on_run_interrupted
       stop
     rescue StandardError => e
-      $stderr.puts e.backtrace
+      STDERR.puts e.backtrace
       fire :on_run_interrupted
       stop
       raise
@@ -126,8 +126,7 @@ module JCukeForker
           end
         end
         process = ChildProcess.build(*process_args)
-        process.io.stdout = $stdout
-        process.io.stderr = $stderr
+        process.io.inherit!
         process.environment['DISPLAY'] = vnc_pool.get.display if vnc_pool
         l << process
       end

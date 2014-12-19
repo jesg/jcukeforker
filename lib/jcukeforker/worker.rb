@@ -104,8 +104,8 @@ module JCukeForker
     def execute_cucumber
       FileUtils.mkdir_p(out) unless File.exist? out
 
-      $stdout.reopen stdout
-      $stderr.reopen stderr
+      STDOUT.reopen stdout
+      STDERR.reopen stderr
 
       begin
         Cucumber::Cli::Main.execute args
@@ -113,8 +113,8 @@ module JCukeForker
         @status = e.success?
       end
 
-      $stdout.flush
-      $stderr.flush
+      STDOUT.flush
+      STDERR.flush
 
       @status
     end
