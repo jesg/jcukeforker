@@ -104,8 +104,8 @@ module JCukeForker
     def execute_cucumber
       FileUtils.mkdir_p(out) unless File.exist? out
 
-      STDOUT.reopen stdout
-      STDERR.reopen stderr
+      STDOUT.reopen stdout, 'a'
+      STDERR.reopen stderr, 'a'
 
       begin
         Cucumber::Cli::Main.execute args
