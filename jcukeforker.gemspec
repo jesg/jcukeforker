@@ -16,11 +16,11 @@ Gem::Specification.new do |s|
 
   s.add_dependency "cucumber", ">= 1.1.5", "< 2.0"
   s.add_dependency "vnctools", ">= 0.1.1"
-  s.add_dependency "celluloid-io", ">= 0.15.0"
+  s.add_dependency "celluloid-io", "<= 0.15"
   s.add_dependency "childprocess", ">= 0.5.3"
-  s.add_development_dependency "rspec", "2.5"
+  s.add_development_dependency "rspec"
   s.add_development_dependency "coveralls"
-  s.add_development_dependency "rake", "~> 0.9.2"
+  s.add_development_dependency "rake", "~> 10"
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")

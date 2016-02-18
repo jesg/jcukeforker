@@ -9,7 +9,7 @@ module JCukeForker
     it "can register a worker" do
 
       UNIXSocket.stub(:open).and_return(mock_socket)
-      expect(mock_socket).to receive(:puts).with({feature: feature}.to_json)
+      mock_socket.should_receive(:puts).with({feature: feature}.to_json)
 
       task_manager = TaskManager.new [feature]
       task_manager.on_worker_register worker_path
@@ -17,7 +17,7 @@ module JCukeForker
 
     it "can finish task" do
 
-      expect(mock_socket).to receive(:puts).with({feature: feature}.to_json)
+      mock_socket.should_receive(:puts).with({feature: feature}.to_json)
 
       task_manager = TaskManager.new [feature]
       task_manager.instance_variable_get(:@worker_sockets)[worker_path] = mock_socket
@@ -26,7 +26,7 @@ module JCukeForker
 
     it "can close dead worker" do
 
-      expect(mock_socket).to receive(:close)
+      mock_socket.should_receive(:close)
 
       task_manager = TaskManager.new [feature]
       task_manager.instance_variable_get(:@worker_sockets)[worker_path] = mock_socket
@@ -35,7 +35,7 @@ module JCukeForker
 
     it "can send '__KILL__' when there are no tasks left" do
 
-      expect(mock_socket).to receive(:puts).with('__KILL__')
+      mock_socket.should_receive(:puts).with('__KILL__')
 
       task_manager = TaskManager.new []
       task_manager.instance_variable_get(:@worker_sockets)[worker_path] = mock_socket

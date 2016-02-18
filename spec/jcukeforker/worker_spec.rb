@@ -34,7 +34,7 @@ module JCukeForker
         expected_args = formats.flat_map do |f|
           %W[--format #{f} --out #{path}/some_feature_51.#{f}]
         end
-        expect(worker.args.each_cons(expected_args.size).include?(expected_args)).to be true
+        worker.args.each_cons(expected_args.size).include?(expected_args).should be true
       end
     end
   end
