@@ -3,19 +3,16 @@ require 'socket'
 module JCukeForker
   class StatusServer
     include Observable
-    include Celluloid::IO
 
-    finalizer :shutdown
     attr_reader :port
 
     def initialize(port = '6333')
-      server = ::TCPServer.new 'localhost', port
-      @port = server.connect_address.ip_port
-      @server = TCPServer.from_ruby_server server
+      @server = ::TCPServer.new 'localhost', port
+      @port = @server.connect_address.ip_port
     end
 
     def run
-      loop { async.handle_connection @server.accept }
+      loop { handle_connection @server.accept }
     end
 
     def shutdown

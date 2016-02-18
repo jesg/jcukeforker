@@ -16,7 +16,6 @@ Gem::Specification.new do |s|
 
   s.add_dependency "cucumber", ">= 1.1.5", "< 2.0"
   s.add_dependency "vnctools", ">= 0.1.1"
-  s.add_dependency "celluloid-io", "<= 0.15"
   s.add_dependency "childprocess", ">= 0.5.3"
   s.add_development_dependency "rspec"
   s.add_development_dependency "coveralls"
