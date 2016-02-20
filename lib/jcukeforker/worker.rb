@@ -1,4 +1,3 @@
-require 'socket'
 require 'securerandom'
 require 'json'
 require 'fileutils'
@@ -16,9 +15,10 @@ module JCukeForker
 
     attr_reader :feature, :format, :out, :basename
 
-    def initialize(status_path, task_path, recorder = nil)
+    def initialize(status_path, task_path, worker_num, recorder = nil)
       @status_path = status_path
       @task_path = task_path
+      @worker_num = worker_num
       if ENV['DISPLAY'] && recorder
         config = JSON.parse(recorder)
         add_observer JCukeForker::RecordingVncListener.new(self, config)
@@ -29,28 +29,29 @@ module JCukeForker
     end
 
     def register
-      @worker_server = UNIXServer.new @task_path
+      @event_file = File.open(@task_path, 'r')
       update_status :on_worker_register
     end
 
     def close
-      @worker_server.close
+      @event_file.close
       @status_file.close
     end
 
     def run
-      worker_socket = @worker_server.accept
       loop do
-        raw_message = worker_socket.gets
+        raw_message = @event_file.gets(sep=$-0)
         if raw_message.nil? then
-          sleep 0.3
+          sleep 0.1
           next
         end
-        if raw_message.strip == '__KILL__'
+        json_obj = JSON.parse raw_message
+        next unless json_obj['worker'] == @worker_num
+        if json_obj['action'] == '__KILL__'
           update_status :on_worker_dead
           break
         end
-        set_state raw_message
+        set_state json_obj
         update_status :on_task_starting, feature
         status = execute_cucumber
         update_status :on_task_finished, feature, status
@@ -58,7 +59,8 @@ module JCukeForker
     end
 
     def update_status(meth, *args)
-      message = [meth, @task_path]
+      message = [meth, @worker_num]
+
       message += args
 
       changed
@@ -92,9 +94,8 @@ module JCukeForker
 
     private
 
-    def set_state(raw_message)
+    def set_state(json_obj)
       @status = nil
-      json_obj = JSON.parse raw_message
       @format = json_obj['format']
       @feature = json_obj['feature']
       @extra_args = json_obj['extra_args']

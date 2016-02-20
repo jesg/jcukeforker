@@ -2,16 +2,14 @@
 module JCukeForker
   class TaskManager < AbstractListener
 
-    def initialize(features, opts={})
+    def initialize(features, io_out, opts={})
       @features = features
       @opts = opts
-      @worker_sockets = {}
+      @io_out = io_out
       @failures = false
-      @mutex = Mutex.new
     end
 
     def on_worker_register(worker_path)
-      @worker_sockets[worker_path] = UNIXSocket.open worker_path
       pop_task worker_path
     end
 
@@ -20,13 +18,8 @@ module JCukeForker
       pop_task worker_path
     end
 
-    def on_worker_dead(worker_path)
-     socket = @worker_sockets.delete worker_path
-     socket.close
-    end
-
     def close
-      @worker_sockets.each {|k, v| v.close}
+      io_out.close
     end
 
     def has_failures?
@@ -36,14 +29,12 @@ module JCukeForker
     private
 
     def pop_task(worker_path)
-        task = '__KILL__'
-        @mutex.synchronize do
-          if feature = @features.shift
-            task = @opts.merge(feature: feature).to_json
-          end
-        end
+      task = {action: '__KILL__', worker: worker_path}.to_json
+      if feature = @features.shift
+        task = @opts.merge(worker: worker_path, feature: feature, action: :feature).to_json
+      end
 
-      @worker_sockets[worker_path].puts(task)
+      @io_out.write("#{task}#{$-0}")
     end
   end
 end

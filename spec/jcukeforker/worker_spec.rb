@@ -10,7 +10,7 @@ module JCukeForker
     let(:worker) do
       File.should_receive(:open).with('/tmp/in', 'a').and_return(mock_status_file)
       mock_status_file.should_receive(:sync=).with(true)
-      Worker.new status_path, worker_path
+      Worker.new status_path, worker_path, '1'
     end
 
     it "can create worker" do
@@ -18,9 +18,10 @@ module JCukeForker
     end
 
     it "can register worker" do
-      UNIXServer.should_receive(:new).with(worker_path).and_return(mock_worker_server)
 
-      mock_status_file.should_receive(:write).with("[\"on_worker_register\",\"/tmp/jcukeforker-test-socket\"]#{$-0}")
+      mock_status_file.should_receive(:write).with("[\"on_worker_register\",\"1\"]#{$-0}")
+      mock_event_file = double(IO)
+      File.should_receive(:open).with(worker_path, 'r').and_return(mock_event_file)
 
       worker.register
     end
@@ -30,7 +31,7 @@ module JCukeForker
       path = "some/path"
 
       it "has an output file for each format specified" do
-        json_str = {'format' => formats, 'feature' => 'some/feature:51', 'extra_args' => [], 'out' => path}.to_json
+        json_str = {'format' => formats, 'feature' => 'some/feature:51', 'extra_args' => [], 'out' => path}
         worker.send :set_state, json_str
         expected_args = formats.flat_map do |f|
           %W[--format #{f} --out #{path}/some_feature_51.#{f}]

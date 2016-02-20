@@ -56,16 +56,18 @@ module JCukeForker
 
       FileUtils.mkdir_p out
       io_in = File.join out, 'in'
+      io_out = File.join out, 'out'
       # truncate
       File.open(io_in, 'w') {}
+      File.open(io_out, 'w') {}
 
       task_opts = {format: format,out: out,extra_args: extra_args}
-      task_manager = TaskManager.new features, task_opts
+      io_out_file = File.open(io_out, 'a')
+      io_out_file.sync = true
+      task_manager = TaskManager.new features, io_out_file, task_opts
 
       listeners << task_manager
       status_server = StatusServer.new io_in
-      worker_dir = "/tmp/jcukeforker-#{SecureRandom.hex 4}"
-      FileUtils.mkdir_p worker_dir
 
       vnc_pool = nil
       if vnc = opts[:vnc]
@@ -78,9 +80,9 @@ module JCukeForker
        end
       end
 
-      processes = create_processes(max, io_in, worker_dir, vnc_pool, opts[:record])
+      processes = create_processes(max, io_in, io_out, vnc_pool, opts[:record])
 
-      runner = Runner.new status_server, processes, worker_dir, vnc_pool, delay, task_manager
+      runner = Runner.new status_server, processes, vnc_pool, delay, task_manager
 
       listeners.each { |l|
         status_server.add_observer l
@@ -90,10 +92,9 @@ module JCukeForker
       runner
     end
 
-    def initialize(status_server, processes, worker_dir, vnc_pool, delay, task_manager)
+    def initialize(status_server, processes, vnc_pool, delay, task_manager)
       @status_server = status_server
       @processes = processes
-      @worker_dir = worker_dir
       @vnc_pool = vnc_pool
       @delay = delay
       @task_manager = task_manager
@@ -115,11 +116,11 @@ module JCukeForker
 
     private
 
-    def self.create_processes(max, status_path, worker_dir, vnc_pool = nil, record = false)
+    def self.create_processes(max, io_in, io_out, vnc_pool = nil, record = false)
       worker_file = "#{File.expand_path File.dirname(__FILE__)}/worker_script.rb"
 
       (1..max).inject([]) do |l, i|
-        process_args = %W[ruby #{worker_file} #{status_path} #{worker_dir}/worker-#{i}]
+        process_args = %W[ruby #{worker_file} #{io_in} #{io_out} #{i}]
         if vnc_pool && record
           if record.kind_of? Hash
             process_args << record.to_json
@@ -153,7 +154,6 @@ module JCukeForker
       @status_server.shutdown
     ensure # catch potential second Interrupt
       @vnc_pool.stop if @vnc_pool
-      FileUtils.rm_r @worker_dir
       fire :on_run_finished, @task_manager.has_failures?
     end
 

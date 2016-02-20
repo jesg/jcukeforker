@@ -44,7 +44,7 @@ module JCukeForker
     end
 
     def worker_id(worker_path)
-      /\-(\d+)$/.match(worker_path).captures[0]
+      worker_path
     end
 
     def log
