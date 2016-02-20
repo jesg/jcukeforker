@@ -2,7 +2,7 @@
 
 Forking cukes and VNC displays.
 
-Jcukeforker is a fork of cukeforker desgined for jruby.
+Jcukeforker is a fork of cukeforker desgined for jruby and windows.  Jcukeforker > 0.3 should work on windows.
 
 [![Gem Version](https://badge.fury.io/rb/jcukeforker.svg)](http://badge.fury.io/rb/jcukeforker)
 [![Build Status](https://secure.travis-ci.org/jesg/jcukeforker.png)](http://travis-ci.org/jesg/jcukeforker)

@@ -9,8 +9,8 @@ Gem::Specification.new do |s|
   s.authors     = ["Jason Gowan", "Jari Bakken"]
   s.email       = ["gowanjason@gmail.com"]
   s.homepage    = ""
-  s.summary     = %q{Library to maintain a forking queue of Cucumber processes, for JRuby}
-  s.description = %q{Library to maintain a forking queue of Cucumber processes, with optional VNC displays. Designed for JRuby.}
+  s.summary     = %q{CukeForker, for JRuby and Windows}
+  s.description = %q{Library to maintain a forking queue of Cucumber processes, with optional VNC displays. Designed for JRuby and Windows.}
 
   s.rubyforge_project = "jcukeforker"
 
