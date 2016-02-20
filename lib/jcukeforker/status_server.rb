@@ -1,41 +1,35 @@
-require 'socket'
 
 module JCukeForker
   class StatusServer
     include Observable
 
-    attr_reader :port
+    attr_reader :io_in
 
-    def initialize(port = '6333')
-      @server = ::TCPServer.new 'localhost', port
-      @port = @server.connect_address.ip_port
-      @thread_pool = []
+    def initialize(io_in)
+      @io_in = File.open(io_in, 'r')
+      @io_in.sync = true
     end
 
     def run
       @master_thread = Thread.new do
         loop do
-          socket = @server.accept
-          @thread_pool << Thread.new { handle_connection(socket) }
+          raw_message = @io_in.gets(sep=$-0)
+          next if raw_message.nil?
+          handle_message(raw_message)
         end
       end
     end
 
     def shutdown
-      if @server
-        @server.close
+      if @io_in
+        @io_in.close
         @master_thread.terminate
-        @thread_pool.each(&:terminate)
       end
     end
 
-    def handle_connection(socket)
-      until socket.eof? do
-        raw_message = socket.gets
-        json_obj = JSON.parse raw_message
-        fire json_obj.first, *json_obj[1..-1]
-      end
-      socket.close
+    def handle_message(raw_message)
+      json_obj = JSON.parse raw_message
+      fire json_obj.first, *json_obj[1..-1]
     end
 
     private

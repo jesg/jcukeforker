@@ -17,10 +17,14 @@ module JCukeForker
 
         mock_task_manager = double(TaskManager, :update => nil, :has_failures? => false)
         mock_status_server = double(StatusServer, :port => nil)
+        mock_io_out = double(IO, :sync= => nil)
         mock_tasks = Array.new(2) { |n| double("Worker-#{n}") }
 
-        TaskManager.should_receive(:new).with(features, {format: format, out: out, extra_args: []}).and_return mock_task_manager
-        StatusServer.should_receive(:new).with('6333').and_return mock_status_server
+        TaskManager.should_receive(:new).with(features, mock_io_out, {format: format, out: out, extra_args: []}).and_return mock_task_manager
+        StatusServer.should_receive(:new).with('/tmp/in').and_return mock_status_server
+        File.should_receive(:open).with('/tmp/in', 'w').and_return mock_io_out
+        File.should_receive(:open).with('/tmp/out', 'w').and_return mock_io_out
+        File.should_receive(:open).with('/tmp/out', 'a').and_return mock_io_out
 
         mock_status_server.should_receive(:add_observer).with listeners.first
         mock_status_server.should_receive(:add_observer).with mock_task_manager
@@ -52,7 +56,7 @@ module JCukeForker
       let(:work_dir) { '/tmp/jcukeforker-testdir' }
       let(:vnc_pool) { double(VncTools::ServerPool, :stop => nil) }
       let(:mock_task_manager) { double(TaskManager, :update => nil, :has_failures? => false) }
-      let(:runner)   { Runner.new(status_server, [process], work_dir, vnc_pool, 0, mock_task_manager) }
+      let(:runner)   { Runner.new(status_server, [process], vnc_pool, 0, mock_task_manager) }
 
 
       it "processes the queue" do
@@ -62,7 +66,6 @@ module JCukeForker
         process.should_receive(:start)
         process.should_receive(:wait)
 #        listener.should_receive(:update).with(:on_run_finished, false)
-        FileUtils.should_receive(:rm_r).with(work_dir)
 
         runner.run
       end
