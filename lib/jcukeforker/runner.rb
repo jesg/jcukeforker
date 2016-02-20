@@ -19,8 +19,6 @@ module JCukeForker
   #   :format     => Symbol            format passed to `cucumber --format` (default: html)
   #   :extra_args => Array             extra arguments passed to cucumber
   #   :delay      => Numeric           seconds to sleep between each worker is started (default: 0)
-  #   :port       => String            port that the event server runs on
-  #   (default: 6333)
 
   class Runner
     include Observable
