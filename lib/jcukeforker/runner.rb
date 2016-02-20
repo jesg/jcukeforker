@@ -32,7 +32,6 @@ module JCukeForker
       :log    => true,
       :format => :html,
       :delay  => 0,
-      :port   => '6333'
     }
 
     def self.run(features, opts = {})
