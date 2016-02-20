@@ -20,7 +20,7 @@ module JCukeForker
         mock_tasks = Array.new(2) { |n| double("Worker-#{n}") }
 
         TaskManager.should_receive(:new).with(features, {format: format, out: out, extra_args: []}).and_return mock_task_manager
-        StatusServer.should_receive(:new).with('6333').and_return mock_status_server
+        StatusServer.should_receive(:new).with('/tmp/in').and_return mock_status_server
 
         mock_status_server.should_receive(:add_observer).with listeners.first
         mock_status_server.should_receive(:add_observer).with mock_task_manager

@@ -23,7 +23,8 @@ module JCukeForker
         config = JSON.parse(recorder)
         add_observer JCukeForker::RecordingVncListener.new(self, config)
       end
-      @status_socket = TCPSocket.new 'localhost', status_path
+      @status_file = File.open(status_path, 'a')
+      @status_file.sync = true
       @status = nil
     end
 
@@ -34,7 +35,7 @@ module JCukeForker
 
     def close
       @worker_server.close
-      @status_socket.close
+      @status_file.close
     end
 
     def run
@@ -62,7 +63,7 @@ module JCukeForker
 
       changed
       notify_observers *message
-      @status_socket.puts(message.to_json)
+      @status_file.write("#{message.to_json}#{$-0}")
     end
 
     def failed?

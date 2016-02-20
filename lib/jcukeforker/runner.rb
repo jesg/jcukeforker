@@ -47,21 +47,26 @@ module JCukeForker
       max        = opts[:max]
       raise ':max must be >= 1' if max < 1
       format     = opts[:format]
-      out        = File.join opts[:out]
+      out        = File.expand_path(File.join(opts[:out]))
       listeners  = Array(opts[:notify])
       extra_args = Array(opts[:extra_args])
       delay      = opts[:delay]
-      port       = opts[:port]
+      puts "The port option is deprecated in jcukeforker > 0.2.10" if opts[:port]
 
       if opts[:log]
         listeners << LoggingListener.new
       end
 
+      FileUtils.mkdir_p out
+      io_in = File.join out, 'in'
+      # truncate
+      File.open(io_in, 'w') {}
+
       task_opts = {format: format,out: out,extra_args: extra_args}
       task_manager = TaskManager.new features, task_opts
 
       listeners << task_manager
-      status_server = StatusServer.new port
+      status_server = StatusServer.new io_in
       worker_dir = "/tmp/jcukeforker-#{SecureRandom.hex 4}"
       FileUtils.mkdir_p worker_dir
 
@@ -76,7 +81,7 @@ module JCukeForker
        end
       end
 
-      processes = create_processes(max, status_server.port, worker_dir, vnc_pool, opts[:record])
+      processes = create_processes(max, io_in, worker_dir, vnc_pool, opts[:record])
 
       runner = Runner.new status_server, processes, worker_dir, vnc_pool, delay, task_manager
 
@@ -128,6 +133,7 @@ module JCukeForker
         process = ChildProcess.build(*process_args)
         process.io.inherit!
         process.environment['DISPLAY'] = vnc_pool.get.display if vnc_pool
+        process.environment['JCUKEFORKER_WORKER'] = i
         l << process
       end
     end

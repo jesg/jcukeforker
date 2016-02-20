@@ -2,15 +2,8 @@ require File.expand_path("../../spec_helper", __FILE__)
 
 module JCukeForker
   describe StatusServer do
-    it "initializes at designated port" do
-      mock_tcp_server = double(TCPServer).as_null_object
 
-      TCPServer.should_receive(:new).with('localhost', '4444').and_return mock_tcp_server
-
-      StatusServer.new '4444'
-    end
-
-    it "can handle a connection" do
+    it "can handle a message" do
 
       status = :on_worker_register
       worker_path = 'worker-path'
@@ -21,14 +14,11 @@ module JCukeForker
       mock_listener.should_receive(:update).with(status.to_s, worker_path)
 
       # expect the worker to register
-      status_server = StatusServer.new
+      io_in = '/tmp/in'
+      status_server = StatusServer.new io_in
       status_server.add_observer mock_listener
 
-      socket = TCPSocket.new 'localhost', '6333'
-      socket.puts raw_message
-      socket.close
-
-      status_server.handle_connection( status_server.instance_variable_get(:@server).accept )
+      status_server.handle_message(raw_message)
 
    end
   end
