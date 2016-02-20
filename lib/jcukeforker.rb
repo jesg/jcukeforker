@@ -1,7 +1,3 @@
-unless RUBY_PLATFORM =~ /darwin|linux|java/
-  raise "CukeForker only supported on *nix"
-end
-
 
 require "cucumber/cli/main"
 require "vnctools"
