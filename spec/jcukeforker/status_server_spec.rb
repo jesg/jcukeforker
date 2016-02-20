@@ -30,7 +30,6 @@ module JCukeForker
 
       status_server.handle_connection( status_server.instance_variable_get(:@server).accept )
 
-      status_server.shutdown
    end
   end
 end

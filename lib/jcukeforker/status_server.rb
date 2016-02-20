@@ -9,14 +9,24 @@ module JCukeForker
     def initialize(port = '6333')
       @server = ::TCPServer.new 'localhost', port
       @port = @server.connect_address.ip_port
+      @thread_pool = []
     end
 
     def run
-      loop { handle_connection @server.accept }
+      @master_thread = Thread.new do
+        loop do
+          socket = @server.accept
+          @thread_pool << Thread.new { handle_connection(socket) }
+        end
+      end
     end
 
     def shutdown
-      @server.close if @server
+      if @server
+        @server.close
+        @master_thread.terminate
+        @thread_pool.each(&:terminate)
+      end
     end
 
     def handle_connection(socket)

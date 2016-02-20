@@ -133,7 +133,7 @@ module JCukeForker
     end
 
     def start
-      @status_server.async.run
+      @status_server.run
       fire :on_run_starting
 
       @processes.each do |process|

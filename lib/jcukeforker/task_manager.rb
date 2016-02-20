@@ -7,6 +7,7 @@ module JCukeForker
       @opts = opts
       @worker_sockets = {}
       @failures = false
+      @mutex = Mutex.new
     end
 
     def on_worker_register(worker_path)
@@ -35,10 +36,12 @@ module JCukeForker
     private
 
     def pop_task(worker_path)
-      task = '__KILL__'
-      if feature = @features.shift
-        task = @opts.merge(feature: feature).to_json
-      end
+        task = '__KILL__'
+        @mutex.synchronize do
+          if feature = @features.shift
+            task = @opts.merge(feature: feature).to_json
+          end
+        end
 
       @worker_sockets[worker_path].puts(task)
     end

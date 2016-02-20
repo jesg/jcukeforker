@@ -11,6 +11,7 @@ require "forwardable"
 require "ostruct"
 require "json"
 require "securerandom"
+require "thread"
 
 module JCukeForker
 end

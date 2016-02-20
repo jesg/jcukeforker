@@ -47,8 +47,7 @@ module JCukeForker
     context "running" do
       let(:listener) { double(AbstractListener, :update => nil) }
       let(:queue)    { double(Queue, :has_failures? => false) }
-      let(:status_server0) { double(StatusServer, :run => nil) }
-      let(:status_server) { double(StatusServer, :async => status_server0, :shutdown => nil) }
+      let(:status_server) { double(StatusServer, :run => nil, :shutdown => nil) }
       let(:process) { double(ChildProcess, :start => nil, :wait => nil) }
       let(:work_dir) { '/tmp/jcukeforker-testdir' }
       let(:vnc_pool) { double(VncTools::ServerPool, :stop => nil) }
