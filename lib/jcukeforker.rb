@@ -20,5 +20,6 @@ require 'jcukeforker/status_server'
 require 'jcukeforker/task_manager'
 require 'jcukeforker/configurable_vnc_server'
 
-require 'jcukeforker/formatters/scenario_line_logger'
+require 'jcukeforker/normalised_encoding_file'
+require 'jcukeforker/scenario_list'
 require 'jcukeforker/formatters/junit_scenario_formatter'

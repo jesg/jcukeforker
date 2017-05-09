@@ -1,4 +1,5 @@
-require 'cucumber/runtime/features_loader'
+require 'cucumber/core'
+require 'cucumber/core/filter'
 
 module JCukeForker
 
@@ -14,6 +15,7 @@ module JCukeForker
   #
 
   class Scenarios
+    include Cucumber::Core
     def self.by_args(args)
       options = Cucumber::Cli::Options.new(STDOUT, STDERR, :default_profile => 'default')
       tagged(options.parse!(args)[:tag_expressions])
@@ -25,15 +27,13 @@ module JCukeForker
     end
 
     def self.tagged(tags)
-      tag_expression = Gherkin::TagExpression.new(tags)
-      scenario_line_logger = JCukeForker::Formatters::ScenarioLineLogger.new(tag_expression)
-      loader = Cucumber::Runtime::FeaturesLoader.new(feature_files, [], tag_expression)
-
-      loader.features.each do |feature|
-        feature.accept(scenario_line_logger)
+      scenario_list = ScenarioList.new
+      feature_files.each do |feature|
+        source = JCukeForker::NormalisedEncodingFile.read(feature)
+        file = Cucumber::Core::Gherkin::Document.new(feature, source)
+        self.new.execute([file], scenario_list, [Cucumber::Core::Test::TagFilter.new(tags)])
       end
-
-      scenario_line_logger.scenarios
+      scenario_list.scenarios
     end
 
     def self.feature_files
