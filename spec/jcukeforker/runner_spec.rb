@@ -20,29 +20,29 @@ module JCukeForker
         mock_io_out = double(IO, :sync= => nil)
         mock_tasks = Array.new(2) { |n| double("Worker-#{n}") }
 
-        TaskManager.should_receive(:new).with(features, mock_io_out, {format: format, out: out, extra_args: []}).and_return mock_task_manager
-        StatusServer.should_receive(:new).with('/tmp/in').and_return mock_status_server
-        File.should_receive(:open).with('/tmp/in', 'w').and_return mock_io_out
-        File.should_receive(:open).with('/tmp/out', 'w').and_return mock_io_out
-        File.should_receive(:open).with('/tmp/out', 'a').and_return mock_io_out
+        expect(TaskManager).to receive(:new).with(features, mock_io_out, {format: format, out: out, extra_args: []}).and_return mock_task_manager
+        expect(StatusServer).to receive(:new).with('/tmp/in').and_return mock_status_server
+        expect(File).to receive(:open).with('/tmp/in', 'w').and_return mock_io_out
+        expect(File).to receive(:open).with('/tmp/out', 'w').and_return mock_io_out
+        expect(File).to receive(:open).with('/tmp/out', 'a').and_return mock_io_out
 
-        mock_status_server.should_receive(:add_observer).with listeners.first
-        mock_status_server.should_receive(:add_observer).with mock_task_manager
+        expect(mock_status_server).to receive(:add_observer).with listeners.first
+        expect(mock_status_server).to receive(:add_observer).with mock_task_manager
 
-        Runner.create(features,
+        expect(Runner.create(features,
           :max    => max,
           :notify => listeners,
           :format => format,
           :log    => false,
           :out    => out,
           :delay  => 1
-        ).should be_kind_of(Runner)
+        )).to be_kind_of(Runner)
       end
 
       it "creates and runs a new runner" do
         r = double(Runner)
-        Runner.should_receive(:create).with(%w[a b], {}).and_return(r)
-        r.should_receive(:run)
+        expect(Runner).to receive(:create).with(%w[a b], {}).and_return(r)
+        expect(r).to receive(:run)
 
         Runner.run(%w[a b])
       end
@@ -62,10 +62,9 @@ module JCukeForker
       it "processes the queue" do
         runner.add_observer listener
 
-        listener.should_receive(:update).with(:on_run_starting)
-        process.should_receive(:start)
-        process.should_receive(:wait)
-#        listener.should_receive(:update).with(:on_run_finished, false)
+        expect(listener).to receive(:update).with(:on_run_starting)
+        expect(process).to receive(:start)
+        expect(process).to receive(:wait)
 
         runner.run
       end
@@ -73,9 +72,9 @@ module JCukeForker
       it "fires on_run_interrupted and shuts down if the run is interrupted" do
         runner.add_observer listener
 
-        process.stub(:wait).and_raise(Interrupt)
-        runner.stub(:stop)
-        listener.should_receive(:update).with(:on_run_interrupted)
+        allow(process).to receive(:wait).and_raise(Interrupt)
+        allow(runner).to receive(:stop)
+        expect(listener).to receive(:update).with(:on_run_interrupted)
 
         runner.run
       end
@@ -83,11 +82,10 @@ module JCukeForker
       it "fires on_run_interrupted and shuts down if an error occurs" do
         runner.add_observer listener
 
-        process.stub(:wait).and_raise(StandardError)
-        runner.stub(:stop)
-        listener.should_receive(:update).with(:on_run_interrupted)
+        allow(process).to receive(:wait).and_raise(StandardError)
+        allow(runner).to receive(:stop)
 
-        lambda { runner.run }.should raise_error(StandardError)
+        expect{ runner.run }.to raise_error(StandardError)
       end
     end
 

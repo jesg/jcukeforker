@@ -9,7 +9,7 @@ module JCukeForker
 
     it "can register a worker" do
 
-      mock_file.should_receive(:write).with("{\"worker\":\"/tmp/jcukeforker-test-socket\",\"feature\":\"feature:1\",\"action\":\"feature\"}#{$-0}")
+      expect(mock_file).to receive(:write).with("{\"worker\":\"/tmp/jcukeforker-test-socket\",\"feature\":\"feature:1\",\"action\":\"feature\"}#{$-0}")
 
       task_manager = TaskManager.new [feature], mock_file
       task_manager.on_worker_register worker_path
@@ -17,7 +17,7 @@ module JCukeForker
 
     it "can finish task" do
 
-      mock_file.should_receive(:write).with("{\"worker\":\"/tmp/jcukeforker-test-socket\",\"feature\":\"feature:1\",\"action\":\"feature\"}#{$-0}")
+      expect(mock_file).to receive(:write).with("{\"worker\":\"/tmp/jcukeforker-test-socket\",\"feature\":\"feature:1\",\"action\":\"feature\"}#{$-0}")
 
       task_manager = TaskManager.new [feature], mock_file
       task_manager.on_task_finished worker_path, nil, nil
@@ -25,7 +25,7 @@ module JCukeForker
 
     it "can send '__KILL__' when there are no tasks left" do
 
-      mock_file.should_receive(:write).with("{\"action\":\"__KILL__\",\"worker\":\"/tmp/jcukeforker-test-socket\"}#{$-0}")
+      expect(mock_file).to receive(:write).with("{\"action\":\"__KILL__\",\"worker\":\"/tmp/jcukeforker-test-socket\"}#{$-0}")
 
       task_manager = TaskManager.new [], mock_file
       task_manager.on_task_finished worker_path, nil, nil
@@ -35,7 +35,7 @@ module JCukeForker
       task_manager = TaskManager.new [], mock_file
       def task_manager.pop_task(*args); end
       task_manager.on_task_finished worker_path, feature, false
-      task_manager.has_failures?.should == true
+      expect(task_manager.has_failures?).to eql true
     end
   end
 end

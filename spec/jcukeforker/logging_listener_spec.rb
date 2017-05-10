@@ -6,7 +6,7 @@ module JCukeForker
     let(:listener) { LoggingListener.new stdout }
 
     it "logs all events" do
-      Time.stub(:now => Time.now)
+      allow(Time).to receive(:now).and_return(Time.now)
 
       mock_worker = {:path => '1', :feature => 'foo/bar', :status => true }
       mock_worker2 = {:path => '15', :feature => 'foo/baz', :status => false}
@@ -25,7 +25,7 @@ module JCukeForker
 
       timestamp = Time.now.strftime("%Y-%m-%d %H:%M:%S##{Process.pid}")
 
-      stdout.string.should == <<-OUTPUT
+      expect(stdout.string).to eql <<-OUTPUT
 I, [#{timestamp}]  INFO -- : [    run           ] starting
 I, [#{timestamp}]  INFO -- : [    worker  1     ] register: 1
 I, [#{timestamp}]  INFO -- : [    worker  1     ] starting: foo/bar

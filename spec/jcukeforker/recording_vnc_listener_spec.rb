@@ -12,7 +12,7 @@ module JCukeForker
 
       env = ENV['DISPLAY']
       ENV['DISPLAY']= ':1'
-      ChildProcess.should_receive(:build).with(
+      expect(ChildProcess).to receive(:build).with(
         'ffmpeg',
         '-an',
         '-y',
@@ -24,34 +24,34 @@ module JCukeForker
         './feature.webm'
       ).and_return(recorder)
 
-      recorder.should_receive(:start)
+      expect(recorder).to receive(:start)
 
       listener.on_task_starting worker, feature
       ENV['DISPLAY'] = env
     end
 
     it "stops recording when the task is finished" do
-      recorder.should_receive(:stop)
+      expect(recorder).to receive(:stop)
       listener.instance_variable_set(:@recorder, recorder)
 
       listener.on_task_finished worker, nil, nil
 
-      listener.instance_variable_get(:@recorder).should be_nil
+      expect(listener.instance_variable_get(:@recorder)).to be_nil
     end
 
     it "stops recording when worker dies" do
       listener.instance_variable_set(:@recorder, recorder)
-      recorder.should_receive(:stop)
+      expect(recorder).to receive(:stop)
 
       listener.on_worker_dead(nil)
     end
 
     it "deletes the output file if the worker succeeded" do
-      recorder.stub(:stop)
+      allow(recorder).to receive(:stop)
       listener.instance_variable_set(:@recorder, recorder)
 
-      listener.should_receive(:output).and_return("./foo.mp4")
-      FileUtils.should_receive(:rm_rf).with("./foo.mp4")
+      expect(listener).to receive(:output).and_return("./foo.mp4")
+      expect(FileUtils).to receive(:rm_rf).with("./foo.mp4")
 
       listener.on_task_finished worker, nil, true
     end
@@ -60,7 +60,7 @@ module JCukeForker
       listener = RecordingVncListener.new worker, 'codec' => "flv", 'ext' => 'flv'
       env = ENV['DISPLAY']
       ENV['DISPLAY']= ':1'
-      ChildProcess.should_receive(:build).with(
+      expect(ChildProcess).to receive(:build).with(
         'ffmpeg',
         '-an',
         '-y',

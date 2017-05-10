@@ -8,8 +8,8 @@ module JCukeForker
     let(:mock_worker_server) { double(UNIXServer, :close => nil) }
     let(:mock_worker_socket) { double(UNIXSocket, :close => nil) }
     let(:worker) do
-      File.should_receive(:open).with('/tmp/in', 'a').and_return(mock_status_file)
-      mock_status_file.should_receive(:sync=).with(true)
+      expect(File).to receive(:open).with('/tmp/in', 'a').and_return(mock_status_file)
+      expect(mock_status_file).to receive(:sync=).with(true)
       Worker.new status_path, worker_path, '1'
     end
 
@@ -19,9 +19,9 @@ module JCukeForker
 
     it "can register worker" do
 
-      mock_status_file.should_receive(:write).with("[\"on_worker_register\",\"1\"]#{$-0}")
+      expect(mock_status_file).to receive(:write).with("[\"on_worker_register\",\"1\"]#{$-0}")
       mock_event_file = double(IO)
-      File.should_receive(:open).with(worker_path, 'r').and_return(mock_event_file)
+      expect(File).to receive(:open).with(worker_path, 'r').and_return(mock_event_file)
 
       worker.register
     end
@@ -36,7 +36,7 @@ module JCukeForker
         expected_args = formats.flat_map do |f|
           %W[--format #{f} --out #{path}/some_feature_51.#{f}]
         end
-        worker.args.each_cons(expected_args.size).include?(expected_args).should be true
+        expect(worker.args.each_cons(expected_args.size).include?(expected_args)).to be true
       end
     end
   end
