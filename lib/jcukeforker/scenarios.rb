@@ -31,7 +31,7 @@ module JCukeForker
       feature_files.each do |feature|
         source = JCukeForker::NormalisedEncodingFile.read(feature)
         file = Cucumber::Core::Gherkin::Document.new(feature, source)
-        self.new.execute([file], scenario_list, [Cucumber::Core::Test::TagFilter.new(tags)])
+        self.new.execute([file], [Cucumber::Core::Test::TagFilter.new(tags)], scenario_list)
       end
       scenario_list.scenarios
     end
