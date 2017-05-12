@@ -6,7 +6,6 @@ require 'observer'
 require 'childprocess'
 require_relative './abstract_listener'
 require_relative './recording_vnc_listener'
-require_relative './formatters/scenario_line_logger'
 require_relative './formatters/junit_scenario_formatter'
 
 module JCukeForker

@@ -14,12 +14,13 @@ Gem::Specification.new do |s|
 
   s.rubyforge_project = "jcukeforker"
 
-  s.add_dependency "cucumber", ">= 1.1.5", "< 2.0"
+  s.add_dependency "cucumber", ">= 2.3.2"
   s.add_dependency "vnctools", ">= 0.1.1"
   s.add_dependency "childprocess", ">= 0.5.3"
   s.add_development_dependency "rspec"
   s.add_development_dependency "coveralls"
   s.add_development_dependency "rake", "~> 10"
+  s.add_development_dependency "pry"
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")

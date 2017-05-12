@@ -11,9 +11,9 @@ module JCukeForker
 
       # register a listener, just do an end to end test
       mock_listener = double(AbstractListener, :update => nil)
-      mock_listener.should_receive(:update).with(status.to_s, worker_path)
+      expect(mock_listener).to receive(:update).with(status.to_s, worker_path)
 			mock_io = double(IO, :sync= => nil)
-			File.should_receive(:open).with('/tmp/in', 'r').and_return(mock_io)
+			expect(File).to receive(:open).with('/tmp/in', 'r').and_return(mock_io)
 
       # expect the worker to register
       io_in = '/tmp/in'

@@ -3,65 +3,103 @@ require File.expand_path("../../spec_helper", __FILE__)
 module JCukeForker
   describe Scenarios do
     it "returns all scenarios and their line numbers" do
-      feature_1 = Cucumber::FeatureFile.new("features/test1.feature")
-      feature_2 = Cucumber::FeatureFile.new("features/test2.feature")
+      allow(Scenarios).to receive(:feature_files).and_return(['features/test1.feature', 'features/test2.feature'])
+      allow(JCukeForker::NormalisedEncodingFile).to receive(:read).with(/features\/test\d\.feature/).and_return(<<-GHERKIN)
+      Feature: Test Feature
 
-      feature_1.instance_variable_set(:@source,
-        "Feature: test 1
-          Scenario: test scenario 1
-            Given nothing happens
+        Scenario: Test Scenario 1
+          Given I do fake precondition
+          When I do fake action
+          Then I get fake assertions
 
-          Scenario: test scenario 2
-            Given nothing else happens")
-
-
-      feature_2.instance_variable_set(:@source,
-        "Feature: test 2
-
-          Scenario: test scenario 3
-            Given nothing happens
-
-          Scenario Outline: test scenario 4
-            Given nothing happens
-            Examples:
-            | nothing |
-            | 1       |
-        ")
-
-      Cucumber::FeatureFile.stub(:new).with("features/test1.feature").and_return(feature_1)
-      Cucumber::FeatureFile.stub(:new).with("features/test2.feature").and_return(feature_2)
-
-      Scenarios.stub(:feature_files).and_return(['features/test1.feature', 'features/test2.feature'])
+        Scenario: Test Scenario 2
+          Given I do fake precondition
+          When I do fake action
+          Then I get fake assertions
+      GHERKIN
 
       all_scenarios = Scenarios.all
 
-      all_scenarios.length.should == 4
-      all_scenarios[0].should == "features/test1.feature:2"
-      all_scenarios[1].should == "features/test1.feature:5"
-      all_scenarios[2].should == "features/test2.feature:3"
-      all_scenarios[3].should == "features/test2.feature:10"
+      expect(all_scenarios.length).to eql 4
+      expect(all_scenarios[0]).to eql  "features/test1.feature:3"
+      expect(all_scenarios[1]).to eql "features/test1.feature:8"
+      expect(all_scenarios[2]).to eql "features/test2.feature:3"
+      expect(all_scenarios[3]).to eql "features/test2.feature:8"
     end
 
-    it "returns all scenarios and their line numbers" do
-      feature_1 = Cucumber::FeatureFile.new("features/test1.feature")
+    it "returns all scenarios and their line numbers by tags" do
+      allow(Scenarios).to receive(:feature_files).and_return(['features/test1.feature'])
+      allow(JCukeForker::NormalisedEncodingFile).to receive(:read).with('features/test1.feature').and_return(<<-GHERKIN)
+      Feature: test 1
+          @find_me
+          Scenario: test scenario 1
+            Given nothing happens
+          Scenario: test scenario 2
+            Given nothing else happens
+      GHERKIN
 
-      feature_1.instance_variable_set(:@source,
-        "Feature: test 1
+      all_scenarios = Scenarios.by_args(%W[-t @find_me])
+
+      expect(all_scenarios.length).to eql 1
+      expect(all_scenarios[0]).to eql "features/test1.feature:3"
+    end
+
+    it "returns all scenarios and their line numbers by multiple include tags" do
+      allow(Scenarios).to receive(:feature_files).and_return(['features/test1.feature'])
+      allow(JCukeForker::NormalisedEncodingFile).to receive(:read).with('features/test1.feature').and_return(<<-GHERKIN)
+      Feature: test 1
           @find_me
           Scenario: test scenario 1
             Given nothing happens
 
+          @me_too
           Scenario: test scenario 2
-            Given nothing else happens")
+            Given nothing else happens
+      GHERKIN
 
-      Cucumber::FeatureFile.stub(:new).with("features/test1.feature").and_return(feature_1)
+      all_scenarios = Scenarios.by_args(%W[-t @find_me,@me_too])
 
-      Scenarios.stub(:feature_files).and_return(['features/test1.feature'])
+      expect(all_scenarios.length).to eql 2
+      expect(all_scenarios[0]).to eql "features/test1.feature:3"
+      expect(all_scenarios[1]).to eql "features/test1.feature:7"
+    end
 
-      all_scenarios = Scenarios.by_args(%W[-t @find_me])
+    it "returns all scenarios and their line numbers by multiple and tags" do
+      allow(Scenarios).to receive(:feature_files).and_return(['features/test1.feature'])
+      allow(JCukeForker::NormalisedEncodingFile).to receive(:read).with('features/test1.feature').and_return(<<-GHERKIN)
+      Feature: test 1
+          @find_me @me_too
+          Scenario: test scenario 1
+            Given nothing happens
 
-      all_scenarios.length.should == 1
-      all_scenarios[0].should == "features/test1.feature:3"
+          @me_too
+          Scenario: test scenario 2
+            Given nothing else happens
+      GHERKIN
+
+      all_scenarios = Scenarios.by_args(%W[-t @find_me -t @me_too])
+
+      expect(all_scenarios.length).to eql 1
+      expect(all_scenarios[0]).to eql "features/test1.feature:3"
+    end
+
+    it "returns all scenarios and their line numbers by exclusion tag" do
+      allow(Scenarios).to receive(:feature_files).and_return(['features/test1.feature'])
+      allow(JCukeForker::NormalisedEncodingFile).to receive(:read).with('features/test1.feature').and_return(<<-GHERKIN)
+      Feature: test 1
+          @find_me
+          Scenario: test scenario 1
+            Given nothing happens
+
+          @me_too
+          Scenario: test scenario 2
+            Given nothing else happens
+      GHERKIN
+
+      all_scenarios = Scenarios.by_args(%W[-t ~@find_me])
+
+      expect(all_scenarios.length).to eql 1
+      expect(all_scenarios[0]).to eql "features/test1.feature:7"
     end
   end
 end
